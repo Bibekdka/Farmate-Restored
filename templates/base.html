@@ -4,249 +4,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Farmer App - Kisan Smart</title>
+    <title>{% block title %}Smart Farmer App - Kisan Smart{% endblock %}</title>
+    
+    <!-- External Assets -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --primary-color: #2d7f3e;
-            --secondary-color: #52b788;
-            --accent-color: #95d5b2;
-            --danger-color: #d62828;
-            --warning-color: #f77f00;
-            --info-color: #457b9d;
-            --sidebar-width: 260px;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f0f9f0 0%, #e8f5e9 100%);
-            font-family: 'Outfit', sans-serif;
-            min-height: 100vh;
-            color: #2c3e50;
-        }
-
-        /* Sidebar Styling */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            z-index: 100;
-            width: var(--sidebar-width);
-            padding: 48px 0 0;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
-            background: #2d7f3e;
-            /* Primary Color Background */
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-brand {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 60px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-align: center;
-            line-height: 60px;
-            background: rgba(0, 0, 0, 0.1);
-            color: white;
-            text-decoration: none;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.85);
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.15);
-            padding-left: 28px;
-        }
-
-        .nav-link.active {
-            border-left: 4px solid var(--accent-color);
-        }
-
-        /* Main Content Styling */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 30px;
-            transition: all 0.3s ease;
-        }
-
-        /* Card Styling to Match Theme */
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            background: white;
-            margin-bottom: 24px;
-        }
-
-        .card-header {
-            background: white;
-            border-bottom: 1px solid #f0f0f0;
-            font-weight: 700;
-            color: var(--primary-color);
-            padding: 1.25rem;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-left: calc(var(--sidebar-width) * -1);
-            }
-
-            .sidebar.active {
-                margin-left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-        }
-
-        /* Button & Form Overrides */
-        .btn-success {
-            background-color: var(--primary-color);
-            border: none;
-        }
-
-        .btn-success:hover {
-            background-color: #246632;
-        }
-
-        /* Stats Cards */
-        .stat-card {
-            border-radius: 12px;
-            padding: 1.5rem;
-            color: white;
-            text-align: center;
-        }
-
-        .stat-income {
-            background: linear-gradient(135deg, #52b788 0%, #2d9d78 100%);
-        }
-
-        .stat-expense {
-            background: linear-gradient(135deg, #d62828 0%, #a4161a 100%);
-        }
-
-        .stat-profit {
-            background: linear-gradient(135deg, #457b9d 0%, #1d3557 100%);
-        }
-
-        .stat-card .display-value {
-            font-size: 2rem;
-            font-weight: 800;
-        }
-
-        /* Weather specific */
-        .weather-card {
-            background: linear-gradient(135deg, rgba(79, 172, 254, 0.9) 0%, rgba(0, 242, 254, 0.9) 100%);
-            color: white;
-        }
-    </style>
 </head>
 
 <body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar animate-fade">
+            <div class="sidebar-header mb-4">
+                <a class="sidebar-brand d-flex align-items-center gap-2" href="/">
+                    <span class="fs-3">🌾</span>
+                    <span>Kisan Smart</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu d-flex flex-column mb-auto">
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="/calendar" class="nav-link {% if request.path == '/calendar' %}active{% endif %}">
+                    <i class="fas fa-calendar-alt"></i> Calendar
+                </a>
+                <a href="/weather_history" class="nav-link {% if request.path == '/weather_history' %}active{% endif %}">
+                    <i class="fas fa-cloud-sun"></i> Weather
+                </a>
+                <a href="/crops" class="nav-link {% if request.path == '/crops' %}active{% endif %}">
+                    <i class="fas fa-seedling"></i> Crops & Yield
+                </a>
+                <a href="/knowledge" class="nav-link {% if request.path == '/knowledge' %}active{% endif %}">
+                    <i class="fas fa-brain"></i> Knowledge Hub
+                </a>
+                <a href="/daily_log" class="nav-link {% if request.path == '/daily_log' %}active{% endif %}">
+                    <i class="fas fa-book"></i> Daily Blog
+                </a>
+                <a href="/notes" class="nav-link {% if request.path == '/notes' %}active{% endif %}">
+                    <i class="fas fa-sticky-note"></i> General Notes
+                </a>
+                <a href="/reminders" class="nav-link {% if request.path == '/reminders' %}active{% endif %}">
+                    <i class="fas fa-bell"></i> Tasks
+                </a>
+                <a href="/reports" class="nav-link {% if request.path == '/reports' %}active{% endif %}">
+                    <i class="fas fa-file-invoice-dollar"></i> Reports
+                </a>
+            </div>
 
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <a class="sidebar-brand" href="/">🌾 Kisan Smart</a>
-        <div class="d-flex flex-column mb-auto mt-2">
-            <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
-                🏠 Home
-            </a>
-            <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
-                📊 Dashboard
-            </a>
-            <a href="/calendar" class="nav-link {% if request.path == '/calendar' %}active{% endif %}">
-                📅 Calendar
-            </a>
-            <a href="/weather_history" class="nav-link {% if request.path == '/weather_history' %}active{% endif %}">
-                🌤️ Weather
-            </a>
-            <a href="/crops" class="nav-link {% if request.path == '/crops' %}active{% endif %}">
-                🌾 Crops & Yield
-            </a>
-            <a href="/knowledge" class="nav-link {% if request.path == '/knowledge' %}active{% endif %}">
-                🧠 Knowledge Hub
-            </a>
-            <a href="/daily_log" class="nav-link {% if request.path == '/daily_log' %}active{% endif %}">
-                📝 Daily Blog
-            </a>
-            <a href="/notes" class="nav-link {% if request.path == '/notes' %}active{% endif %}">
-                📒 General Notes
-            </a>
-            <a href="/reminders" class="nav-link {% if request.path == '/reminders' %}active{% endif %}">
-                🔔 Tasks
-            </a>
-            <a href="/reports" class="nav-link {% if request.path == '/reports' %}active{% endif %}">
-                📈 Reports
-            </a>
-        </div>
-
-        <!-- Backup Status Indicator -->
-        <div class="mt-auto px-3 pb-3">
-            <div class="backup-status p-2"
-                style="background: rgba(255,255,255,0.1); border-radius: 8px; border-left: 4px solid #52b788;">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <span style="font-size: 1.1rem;">💾</span>
-                    <strong style="font-size: 0.85rem;">Data Protection</strong>
+            <!-- Backup Status -->
+            <div class="mt-auto">
+                <div class="glass-panel p-3 mb-3" style="background: rgba(255,255,255,0.1); border: none;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fas fa-shield-alt text-accent"></i>
+                        <span class="small fw-bold">Data Protected</span>
+                    </div>
+                    <div class="small opacity-75" id="sidebar-backup-status">
+                        <div id="sidebar-last-backup">Syncing...</div>
+                    </div>
                 </div>
-                <div class="small text-white-50" id="backup-status">
-                    <div class="mb-1">✅ Auto-backup: <span style="color: #95d5b2;">Active</span></div>
-                    <div id="last-backup-time">Loading...</div>
+                <div class="text-center opacity-50 small">
+                    v1.2 Standardized
                 </div>
             </div>
-        </div>
+        </nav>
 
-        <!-- Bottom Section -->
-        <div class="p-3 text-center">
-            <div class="text-white-50 small">v1.1 Setup</div>
-        </div>
-    </nav>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Mobile Navigation Trigger -->
+            <div class="d-md-none mb-4 d-flex align-items-center justify-content-between glass-panel p-3">
+                <h4 class="mb-0">🌾 Kisan Smart</h4>
+                <button class="btn btn-primary" onclick="document.querySelector('.sidebar').classList.toggle('active')">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Mobile Toggle (Visible only on small screens) -->
-        <button class="btn btn-dark d-md-none mb-3"
-            onclick="document.querySelector('.sidebar').classList.toggle('active')">
-            ☰ Menu
-        </button>
-
-        {% block content %}{% endblock %}
-    </main>
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Fetch and display backup status
-        function updateBackupStatus() {
+        // Standardized Backup Monitoring
+        function updateSidebarBackup() {
             fetch('/api/backup_status')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    const statusDiv = document.getElementById('last-backup-time');
+                    const el = document.getElementById('sidebar-last-backup');
                     if (data.last_backup) {
-                        const timeAgo = getTimeAgo(new Date(data.last_backup));
-                        statusDiv.innerHTML = `📅 Last: <span style="color: #95d5b2;">${timeAgo}</span>`;
+                        const date = new Date(data.last_backup);
+                        el.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${getTimeAgo(date)}`;
                     } else {
-                        statusDiv.innerHTML = '⚠️ No backups found';
+                        el.innerHTML = `<i class="fas fa-exclamation-triangle text-warning"></i> No Backups`;
                     }
                 })
-                .catch(err => {
-                    console.error('Backup status error:', err);
-                });
+                .catch(() => {});
         }
 
         function getTimeAgo(date) {
@@ -256,25 +117,11 @@
             if (minutes < 60) return `${minutes}m ago`;
             const hours = Math.floor(minutes / 60);
             if (hours < 24) return `${hours}h ago`;
-            const days = Math.floor(hours / 24);
-            if (days === 1) return 'Yesterday';
-            if (days < 7) return `${days}d ago`;
             return date.toLocaleDateString();
         }
 
-        // Update on load and every 30 seconds
-        updateBackupStatus();
-        setInterval(updateBackupStatus, 30000);
-
-        // Check for specific reminders
-        function checkReminders() {
-            const now = new Date();
-            const hour = now.getHours();
-            if (hour === 8 || hour === 17) {
-                // Mock notification
-            }
-        }
-        setInterval(checkReminders, 600000); 
+        updateSidebarBackup();
+        setInterval(updateSidebarBackup, 60000);
     </script>
 </body>
 

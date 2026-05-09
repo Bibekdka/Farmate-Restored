@@ -1,96 +1,113 @@
 {% extends 'base.html' %}
 
+{% block title %}Crops - Kisan Smart{% endblock %}
+
 {% block content %}
-<div class="row mb-4">
+<div class="row mb-4 animate-fade">
     <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h2>🌾 Crop Lifecycle Manager</h2>
+        <div class="glass-panel p-4 d-flex justify-content-between align-items-center border-start border-4 border-primary">
             <div>
-                <button class="btn btn-warning text-dark me-2" data-bs-toggle="modal" data-bs-target="#smartPlanModal">
-                    💰 What to Plant?
-                </button>
+                <h2 class="mb-1 fw-bold">🌾 Crop Lifecycle</h2>
+                <p class="text-muted mb-0">Track and optimize your farm's production with AI insights.</p>
+            </div>
+            <div class="d-flex gap-2">
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCropModal">
-                    ➕ Add New Crop
+                    <i class="fas fa-plus me-1"></i> New Crop
+                </button>
+                <button class="btn btn-accent text-white" data-bs-toggle="modal" data-bs-target="#smartPlanModal">
+                    <i class="fas fa-magic me-1"></i> Profit Plan
                 </button>
             </div>
         </div>
-        <p class="text-muted">Track your crops from sowing to harvest.</p>
     </div>
 </div>
 
-<div class="row">
+<div class="row animate-fade">
     {% for crop in crops %}
     <div class="col-md-6 mb-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold text-success">{{ crop.crop_name }} <small class="text-muted">({{ crop.variety
-                        }})</small></h5>
-                <span class="badge {% if crop.status == 'Active' %}bg-success{% else %}bg-secondary{% endif %}">{{
-                    crop.status }}</span>
+        <div class="glass-card h-100 transition">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 fw-bold text-primary">{{ crop.crop_name }} <small class="text-muted h6">({{ crop.variety or 'Standard' }})</small></h4>
+                <span class="badge {% if crop.status == 'Active' %}bg-success{% else %}bg-secondary{% endif %} rounded-pill px-3">
+                    {{ crop.status }}
+                </span>
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <small class="text-muted">Sowing Date</small>
-                        <p class="fw-bold">{{ crop.sowing_date.strftime('%d %b %Y') if crop.sowing_date else 'N/A' }}
-                        </p>
-                    </div>
-                    <div class="col-6 text-end">
-                        <small class="text-muted">Expected Harvest</small>
-                        <p class="fw-bold">{{ crop.expected_harvest.strftime('%d %b %Y') if crop.expected_harvest else
-                            'N/A' }}</p>
+
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="p-2 bg-light rounded-3 text-center border">
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Sowing</small>
+                        <span class="fw-bold">{{ crop.sowing_date.strftime('%d %b %Y') if crop.sowing_date else 'N/A' }}</span>
                     </div>
                 </div>
+                <div class="col-6">
+                    <div class="p-2 bg-light rounded-3 text-center border">
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Expected Harvest</small>
+                        <span class="fw-bold">{{ crop.expected_harvest.strftime('%d %b %Y') if crop.expected_harvest else 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Progress Bar Logic -->
-                {% if crop.sowing_date and crop.expected_harvest and crop.status == 'Active' %}
+            <!-- Progress Tracking -->
+            {% if crop.sowing_date and crop.expected_harvest and crop.status == 'Active' %}
                 {% set total_days = (crop.expected_harvest - crop.sowing_date).days %}
                 {% set days_passed = (today_date - crop.sowing_date).days %}
-                {% if total_days > 0 %}
-                {% set progress = (days_passed / total_days) * 100 %}
-                {% else %}
-                {% set progress = 100 %}
-                {% endif %}
-
+                {% set progress = ((days_passed / total_days) * 100)|round|int if total_days > 0 else 100 %}
                 {% if progress > 100 %}{% set progress = 100 %}{% endif %}
+                {% if progress < 0 %}{% set progress = 0 %}{% endif %}
 
-                <small class="text-muted mb-1 d-block">
-                    Lifecycle Progress: {{ days_passed }} / {{ total_days }} Days
-                    {% if days_passed > total_days %} (Overdue) {% endif %}
-                </small>
-                <div class="progress mb-3" style="height: 10px;">
-                    <div class="progress-bar {% if progress >= 100 %}bg-warning{% else %}bg-success{% endif %}"
-                        role="progressbar" style="width: {{ progress }}%"></div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <small class="fw-bold text-muted">Lifecycle Progress</small>
+                        <small class="fw-bold text-primary">{{ progress }}%</small>
+                    </div>
+                    <div class="progress" style="height: 12px; border-radius: 6px; background: rgba(0,0,0,0.05);">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated {% if progress >= 90 %}bg-warning{% else %}bg-primary{% endif %}" 
+                             role="progressbar" style="width: {{ progress }}%"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted small">{{ days_passed }} days passed out of {{ total_days }} total</small>
+                    </div>
                 </div>
-                {% else %}
-                <div class="alert alert-light border text-center p-2 mb-3">
-                    <small>Add dates to track progress</small>
+            {% else %}
+                <div class="alert alert-light border-dashed text-center py-4 mb-3" style="border: 2px dashed #ddd;">
+                    <i class="fas fa-calendar-plus opacity-25 fs-2 mb-2 d-block"></i>
+                    <small class="text-muted">Set sowing & harvest dates to track progress</small>
                 </div>
-                {% endif %}
+            {% endif %}
 
-                <p class="card-text text-muted"><i class="bi bi-geo-alt"></i> Area: {{ crop.area }}</p>
+            <div class="mb-4">
+                <div class="d-flex align-items-center gap-2 text-muted mb-2">
+                    <i class="fas fa-ruler-combined"></i>
+                    <span>Area: <strong>{{ crop.area or 'Not set' }}</strong></span>
+                </div>
                 {% if crop.notes %}
-                <div class="bg-light p-2 rounded mb-3">
-                    <small>📝 {{ crop.notes }}</small>
+                <div class="p-3 bg-light rounded-3 border-start border-3 border-accent">
+                    <small class="text-muted"><i class="fas fa-sticky-note me-1"></i> {{ crop.notes }}</small>
                 </div>
                 {% endif %}
-
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('edit_crop', crop_id=crop.id) }}"
-                        class="btn btn-outline-secondary btn-sm flex-grow-1">Edit</a>
-                    <form action="{{ url_for('delete_crop', crop_id=crop.id) }}" method="POST"
-                        class="d-inline flex-grow-1">
-                        <button type="submit" class="btn btn-outline-danger btn-sm w-100"
-                            onclick="return confirm('Delete this crop?')">Delete</button>
-                    </form>
-                </div>
             </div>
-            <!-- AI Insight -->
-            <div class="card-footer bg-light border-0">
-                <button class="btn btn-sm btn-info w-100 text-white"
-                    onclick="openCropDoctor('{{ crop.crop_name }}', '{{ crop.sowing_date }}')">
-                    🤖 Ask Crop Doctor
+
+            <div class="mt-auto d-flex gap-2 border-top pt-3">
+                <button class="btn btn-outline-primary btn-sm flex-grow-1" onclick="openCropDoctor('{{ crop.crop_name }}', '{{ crop.sowing_date }}')">
+                    <i class="fas fa-user-md me-1"></i> Crop Doctor
                 </button>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Actions
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                        <li><a class="dropdown-item" href="{{ url_for('edit_crop', crop_id=crop.id) }}"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ url_for('delete_crop', crop_id=crop.id) }}" method="POST">
+                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this crop?')">
+                                    <i class="fas fa-trash me-2"></i> Delete
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -99,15 +116,59 @@
 
 <!-- Crop Doctor Modal -->
 <div class="modal fade" id="cropDoctorModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">🤖 Crop Doctor</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-panel border-0">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-user-md text-primary me-2"></i> Crop Doctor AI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <h5 id="doctorCropName" class="text-primary mb-3"></h5>
-                <div id="doctorContent">Thinking...</div>
+            <div class="modal-body py-4">
+                <div id="doctorHeader" class="mb-4 text-center">
+                    <h5 id="doctorCropName" class="fw-bold text-gradient"></h5>
+                    <p class="text-muted small">AI-driven analysis for your specific lifecycle stage</p>
+                </div>
+                <div id="doctorContent" class="p-3 bg-white rounded-3 shadow-sm border" style="min-height: 200px;">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary mb-3"></div>
+                        <p class="text-muted">Consulting agricultural knowledge base...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profit Estimator Modal -->
+<div class="modal fade" id="smartPlanModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-panel border-0">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-magic text-accent me-2"></i> Smart Profit Estimator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Available Land</label>
+                        <input type="text" id="planArea" class="form-control" placeholder="e.g. 2 Acres">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Target Season</label>
+                        <select id="planSeason" class="form-select">
+                            <option value="Current Season">Current Season (Now)</option>
+                            <option value="Summer">Summer (Kharif)</option>
+                            <option value="Winter">Winter (Rabi)</option>
+                            <option value="Monsoon">Monsoon</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm" onclick="getSmartPlan()">
+                    <i class="fas fa-rocket me-2"></i> Generate Profit Optimization Plan
+                </button>
+
+                <div id="planResult" class="mt-4 p-4 bg-white rounded-3 shadow-sm border d-none">
+                    <div id="planContent"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -115,125 +176,85 @@
 
 <!-- Add Crop Modal -->
 <div class="modal fade" id="addCropModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New Crop</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-panel border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-seedling text-success me-2"></i> Add New Crop</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ url_for('crops') }}" method="POST">
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label>Crop Name</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Crop Name</label>
                             <input type="text" name="crop_name" class="form-control" placeholder="e.g. Rice" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Variety</label>
-                            <input type="text" name="variety" class="form-control" placeholder="e.g. Basmati">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Variety</label>
+                            <input type="text" name="variety" class="form-control" placeholder="Basmati">
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Area (Acres/Hectares)</label>
-                        <input type="text" name="area" class="form-control" placeholder="e.g. 2 Acres">
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label>Sowing Date</label>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Area</label>
+                            <input type="text" name="area" class="form-control" placeholder="e.g. 2 Acres">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Sowing Date</label>
                             <input type="date" name="sowing_date" class="form-control" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Expected Harvest <small class="text-muted">(Optional)</small></label>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Expected Harvest</label>
                             <div class="input-group">
                                 <input type="date" name="expected_harvest" class="form-control" id="harvestDateInput">
-                                <button type="button" class="btn btn-outline-info" onclick="autoEstimateHarvest()"
-                                    title="Ask AI to guess">
-                                    ✨ Auto
+                                <button type="button" class="btn btn-info text-white" onclick="autoEstimateHarvest()" title="AI Estimation">
+                                    <i class="fas fa-robot"></i>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Notes</label>
-                        <textarea name="notes" class="form-control" rows="2"></textarea>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Notes</label>
+                            <textarea name="notes" class="form-control" rows="2" placeholder="Soil condition, fertilizer used, etc."></textarea>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Add Crop</button>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Add Crop</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<!-- Smart Plan Modal -->
-<div class="modal fade" id="smartPlanModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title text-dark">💰 Smart Profit Estimator</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Available Land</label>
-                        <input type="text" id="planArea" class="form-control" placeholder="e.g. 1 Acre">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Season / Month</label>
-                        <select id="planSeason" class="form-select">
-                            <option value="Current Season">Current Season (Now)</option>
-                            <option value="Next Month">Next Month</option>
-                            <option value="Summer">Summer</option>
-                            <option value="Monsoon">Monsoon</option>
-                            <option value="Winter">Winter</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn btn-dark w-100 mb-3" onclick="getSmartPlan()">🚀 Generate Profitable Plan</button>
-
-                <div id="planResult" class="p-3 border rounded bg-light d-none">
-                    <h5 class="text-success">💡 AI Recommendations:</h5>
-                    <div id="planContent">Loading...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
-    // Existing Crop Doctor Script
     function openCropDoctor(cropName, sowingDate) {
-        // Show Modal
         const modal = new bootstrap.Modal(document.getElementById('cropDoctorModal'));
-        document.getElementById('doctorCropName').innerText = "Analyzing " + cropName + "...";
-        document.getElementById('doctorContent').innerHTML = '<div class="spinner-border spinner-border-sm text-info"></div> Consulting database...';
+        document.getElementById('doctorCropName').innerText = cropName;
+        document.getElementById('doctorContent').innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary mb-3"></div>
+                <p class="text-muted">Analyzing ${cropName} lifecycle for today's conditions...</p>
+            </div>
+        `;
         modal.show();
 
-        // Call API
         fetch('/api/ask_crop_doctor', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ crop_name: cropName, sowing_date: sowingDate })
         })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('doctorContent').innerHTML = data.content;
-                } else {
-                    document.getElementById('doctorContent').innerText = "Error: " + data.message;
-                }
-            })
-            .catch(err => {
-                document.getElementById('doctorContent').innerText = "Connection Failed.";
-            });
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('doctorContent').innerHTML = `<div class="p-2">${data.content}</div>`;
+            } else {
+                document.getElementById('doctorContent').innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            }
+        })
+        .catch(() => {
+            document.getElementById('doctorContent').innerHTML = `<div class="alert alert-danger">Failed to connect to AI service.</div>`;
+        });
     }
 
-    // New Smart Plan Script
     function getSmartPlan() {
         const area = document.getElementById('planArea').value || "1 Acre";
         const season = document.getElementById('planSeason').value;
@@ -241,25 +262,31 @@
         const contentDiv = document.getElementById('planContent');
 
         resultDiv.classList.remove('d-none');
-        contentDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-success"></div> Crunching market data...';
+        contentDiv.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-grow text-accent mb-3"></div>
+                <p class="text-muted">Crunching historical market data and soil trends...</p>
+            </div>
+        `;
 
         fetch('/api/recommend_crops', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ area: area, season: season })
         })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    contentDiv.innerHTML = data.content;
-                } else {
-                    contentDiv.innerText = "Error: " + data.message;
-                }
-            })
-            .catch(err => {
-                contentDiv.innerText = "Connection Failed.";
-            });
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                contentDiv.innerHTML = `<h5 class="text-success mb-3 fw-bold"><i class="fas fa-lightbulb me-2"></i> AI Recommendations</h5>` + data.content;
+            } else {
+                contentDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            }
+        })
+        .catch(() => {
+            contentDiv.innerHTML = `<div class="alert alert-danger">Market data service unavailable.</div>`;
+        });
     }
+
     function autoEstimateHarvest() {
         const cropName = document.querySelector('input[name="crop_name"]').value;
         const sowingDate = document.querySelector('input[name="sowing_date"]').value;
@@ -270,33 +297,39 @@
             return;
         }
 
-        harvestInput.type = 'text';
-        harvestInput.value = "🤖 Asking AI...";
+        const originalBtn = event.currentTarget;
+        const originalContent = originalBtn.innerHTML;
+        originalBtn.disabled = true;
+        originalBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         fetch('/api/estimate_duration', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ crop_name: cropName })
         })
-            .then(res => res.json())
-            .then(data => {
-                harvestInput.type = 'date';
-                if (data.status === 'success' && data.days) {
-                    // Calculate date: Sowing + Days
-                    const sowing = new Date(sowingDate);
-                    sowing.setDate(sowing.getDate() + data.days);
-                    harvestInput.valueAsDate = sowing;
-                    alert(`AI Estimated: ${data.days} days duration.`);
-                } else {
-                    harvestInput.value = "";
-                    alert("Could not estimate. Please enter manually.");
-                }
-            })
-            .catch(err => {
-                harvestInput.type = 'date';
-                harvestInput.value = "";
-                alert("AI Connection failed.");
-            });
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success' && data.days) {
+                const sowing = new Date(sowingDate);
+                sowing.setDate(sowing.getDate() + data.days);
+                harvestInput.valueAsDate = sowing;
+            } else {
+                alert("Could not estimate automatically.");
+            }
+        })
+        .finally(() => {
+            originalBtn.disabled = false;
+            originalBtn.innerHTML = originalContent;
+        });
     }
 </script>
+
+<style>
+    .transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .glass-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .border-dashed { border: 2px dashed rgba(0,0,0,0.1) !important; }
+    .bg-white-10 { background: rgba(255,255,255,0.1); }
+    .btn-accent { background: var(--accent); border-color: var(--accent); }
+    .btn-accent:hover { background: #f57c00; border-color: #f57c00; }
+</style>
 {% endblock %}
