@@ -11,7 +11,9 @@ class Config:
         
     uri = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(instance_path, 'farm_data.db'))
     if uri and uri.startswith("postgres://"):
-        uri = uri.replace("postgres://", "postgresql://", 1)
+        uri = uri.replace("postgres://", "postgresql+psycopg://", 1)
+    elif uri and uri.startswith("postgresql://") and not uri.startswith("postgresql+psycopg://"):
+        uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
     
     SQLALCHEMY_DATABASE_URI = uri
     SQLALCHEMY_TRACK_MODIFICATIONS = False
