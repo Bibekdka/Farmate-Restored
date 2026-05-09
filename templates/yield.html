@@ -1,103 +1,137 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<h2>📈 Yield Tracking</h2>
+{% block title %}Yield Tracking - Farmate{% endblock %}
 
-<div class="row">
-    <div class="col-md-5">
-        <div class="card p-4">
-            <h4>➕ Log Yield</h4>
-            <form method="POST">
-                <div class="mb-3">
-                    <label>Date</label>
-                    <input type="date" id="yieldDateInput" name="date" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Crop</label>
-                    <select name="crop_id" class="form-select" required>
-                        <option value="">-- Select Crop --</option>
-                        {% for crop in crops %}
-                        <option value="{{ crop.id }}">{{ crop.crop_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Yield Value</label>
-                    <input type="number" step="0.01" name="yield_value" class="form-control" placeholder="e.g., 100" required>
-                </div>
-                <div class="mb-3">
-                    <label>Unit</label>
-                    <select name="unit" class="form-select">
-                        <option>kg</option>
-                        <option>quintal</option>
-                        <option>tons</option>
-                        <option>grams</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Notes</label>
-                    <textarea name="notes" class="form-control" rows="2"></textarea>
-                </div>
-                <button type="submit" class="btn btn-success w-100">Save Yield</button>
-            </form>
+{% block content %}
+<div class="animate-slide-up">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="text-gradient mb-1">Yield Insights</h2>
+            <p class="text-muted">Track and analyze your harvest performance over time.</p>
         </div>
     </div>
 
-    <div class="col-md-7">
-        <div class="card p-4">
-            <h4>📊 Yield Records</h4>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Date</th>
-                            <th>Crop</th>
-                            <th>Yield Value</th>
-                            <th>Unit</th>
-                            <th>In KG</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for yield_rec in yields|sort(attribute='date', reverse=True) %}
-                        <tr>
-                            <td>{{ yield_rec.date.strftime('%Y-%m-%d') }}</td>
-                            <td>
-                                {% set crop = crops|selectattr('id', 'equalto', yield_rec.crop_id)|first %}
-                                {{ crop.crop_name if crop else 'Unknown' }}
-                            </td>
-                            <td>{{ "%.2f"|format(yield_rec.yield_value) }}</td>
-                            <td>{{ yield_rec.unit }}</td>
-                            <td class="fw-bold text-success">{{ "%.2f"|format(yield_rec.yield_in_kg) }} kg</td>
-                            <td>
-                                <form method="POST" action="{{ url_for('delete_yield', yield_id=yield_rec.id) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- Summary Stats -->
+    <div class="stats-grid">
+        <div class="stat-card-modern">
+            <div class="stat-icon-box bg-soft-primary text-primary" style="background: #eff6ff;">
+                <i data-lucide="bar-chart-2"></i>
             </div>
-            
-            <!-- Summary Statistics -->
-            <div class="mt-4">
-                <h5>📈 Statistics</h5>
-                <p><strong>Total Yield:</strong> {{ "%.2f"|format(yields|map(attribute='yield_in_kg')|sum) }} kg</p>
-                <p><strong>Average Yield per Crop:</strong>
-                    {% set crop_yields = {} %}
-                    {% for y in yields %}
-                        {% if y.crop_id not in crop_yields %}
-                            {% set crop_yields = crop_yields|combine({y.crop_id: []}) %}
-                        {% endif %}
-                        {% set _ = crop_yields[y.crop_id].append(y.yield_in_kg) %}
-                    {% endfor %}
-                    {% for crop_id, values in crop_yields.items() %}
-                        {% set crop = crops|selectattr('id', 'equalto', crop_id)|first %}
-                        {{ crop.crop_name }}: {{ "%.2f"|format(values|sum / values|length) }} kg
-                        {% if not loop.last %}<br>{% endif %}
-                    {% endfor %}
-                </p>
+            <div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">Total Harvest</p>
+                <h3 class="mb-0 fw-bold">{{ "{:,.0f}".format(yields|map(attribute='yield_in_kg')|sum) }} <span class="fs-6 text-muted">kg</span></h3>
+            </div>
+        </div>
+        <div class="stat-card-modern">
+            <div class="stat-icon-box bg-soft-success text-success" style="background: #ecfdf5;">
+                <i data-lucide="sprout"></i>
+            </div>
+            <div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">Crops Tracked</p>
+                <h3 class="mb-0 fw-bold">{{ crops|length }}</h3>
+            </div>
+        </div>
+        <div class="stat-card-modern">
+            <div class="stat-icon-box bg-soft-accent text-accent" style="background: #fffbeb;">
+                <i data-lucide="calendar"></i>
+            </div>
+            <div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">Last Update</p>
+                <h3 class="mb-0 fw-bold">{{ yields|sort(attribute='date', reverse=True)|map(attribute='date')|first|strftime('%d %b') if yields else '--' }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Log Yield Form -->
+        <div class="col-lg-4">
+            <div class="glass-card">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="stat-icon-box bg-primary text-white shadow-sm mb-0" style="width: 40px; height: 40px; border-radius: 10px;">
+                        <i data-lucide="plus" style="width: 20px;"></i>
+                    </div>
+                    <h4 class="mb-0">Log Harvest</h4>
+                </div>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Date of Harvest</label>
+                        <input type="date" id="yieldDateInput" name="date" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Crop Variety</label>
+                        <select name="crop_id" class="form-select" required>
+                            <option value="">-- Select Crop --</option>
+                            {% for crop in crops %}
+                            <option value="{{ crop.id }}">{{ crop.crop_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-7 mb-3">
+                            <label class="form-label small fw-bold text-muted">Quantity</label>
+                            <input type="number" step="0.01" name="yield_value" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label class="form-label small fw-bold text-muted">Unit</label>
+                            <select name="unit" class="form-select">
+                                <option>kg</option>
+                                <option>quintal</option>
+                                <option>tons</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">Observation Notes</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Quality, conditions, etc..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary-modern w-100 py-3">Save Record</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Records Table -->
+        <div class="col-lg-8">
+            <div class="glass-card h-100">
+                <h4 class="mb-4">History</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr class="text-muted small text-uppercase">
+                                <th>Date</th>
+                                <th>Crop Details</th>
+                                <th class="text-end">Yield (KG)</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for yield_rec in yields|sort(attribute='date', reverse=True) %}
+                            <tr>
+                                <td class="text-muted">{{ yield_rec.date.strftime('%d %b %Y') }}</td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ yield_rec.crop.crop_name if yield_rec.crop else 'Unknown' }}</div>
+                                    <small class="text-muted">{{ yield_rec.notes or 'No notes' }}</small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="fw-bold text-primary">{{ "{:,.2f}".format(yield_rec.yield_in_kg) }} kg</div>
+                                    <small class="text-muted">{{ "%.1f"|format(yield_rec.yield_value) }} {{ yield_rec.unit }}</small>
+                                </td>
+                                <td class="text-end">
+                                    <form method="POST" action="{{ url_for('delete_yield', yield_id=yield_rec.id) }}">
+                                        <button type="submit" class="btn btn-light btn-sm text-danger" onclick="return confirm('Delete this record?')">
+                                            <i data-lucide="trash-2" style="width: 16px;"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">No harvest data available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -105,5 +139,7 @@
 
 <script>
     document.getElementById('yieldDateInput').valueAsDate = new Date();
+    lucide.createIcons();
 </script>
 {% endblock %}
+

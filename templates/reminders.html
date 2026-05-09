@@ -1,99 +1,154 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<h2>🔔 Reminders & Tasks</h2>
+{% block title %}Reminders & Tasks - Farmate{% endblock %}
 
-<div class="row">
-    <div class="col-md-5">
-        <div class="card p-4">
-            <h4>➕ Add Reminder</h4>
-            <form method="POST">
-                <div class="mb-3">
-                    <label>Date</label>
-                    <input type="date" id="reminderDate" name="date" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Title</label>
-                    <input type="text" name="title" class="form-control" placeholder="e.g., Water plants" required>
-                </div>
-                <div class="mb-3">
-                    <label>Description</label>
-                    <textarea name="description" class="form-control" rows="2" placeholder="Detailed description..."></textarea>
-                </div>
-                <div class="mb-3">
-                    <label>Priority</label>
-                    <select name="priority" class="form-select">
-                        <option>Low</option>
-                        <option selected>Normal</option>
-                        <option>High</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-success w-100">Add Reminder</button>
-            </form>
+{% block content %}
+<div class="animate-slide-up">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-12">
+            <h2 class="text-gradient mb-1">Reminders & Tasks</h2>
+            <p class="text-muted">Plan your farm operations and never miss a critical task.</p>
         </div>
     </div>
 
-    <div class="col-md-7">
-        <div class="card p-4">
-            <h4>📋 All Reminders</h4>
-            
+    <div class="row g-4">
+        <!-- Add Reminder Form -->
+        <div class="col-md-5">
+            <div class="glass-card p-4 sticky-top" style="top: 100px; z-index: 10;">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary me-3">
+                        <i data-lucide="plus-circle" class="icon-sm"></i>
+                    </div>
+                    <h4 class="mb-0 fw-bold">Add Reminder</h4>
+                </div>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">📅 Execution Date</label>
+                        <input type="date" id="reminderDate" name="date" class="form-control glass-panel" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">📝 Task Title</label>
+                        <input type="text" name="title" class="form-control glass-panel" placeholder="e.g., Irrigation System Check" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">ℹ️ Description (Optional)</label>
+                        <textarea name="description" class="form-control glass-panel" rows="3" placeholder="Add specific details or instructions..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">⚡ Priority Level</label>
+                        <select name="priority" class="form-select glass-panel">
+                            <option value="Low">Low Priority</option>
+                            <option value="Normal" selected>Normal Priority</option>
+                            <option value="High">High Priority</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm d-flex align-items-center justify-content-center py-2">
+                        <i data-lucide="save" class="icon-sm me-2"></i> Create Task
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Reminders List -->
+        <div class="col-md-7">
             <!-- Upcoming Reminders -->
-            <h5 class="mt-4">📌 Upcoming</h5>
-            <div class="list-group">
-                {% set upcoming = reminders|selectattr('completed', 'equalto', False)|list %}
-                {% for reminder in upcoming %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1">{{ reminder.title }}</h6>
-                            <small>{{ reminder.date.strftime('%Y-%m-%d') }} - 
-                                <span class="badge {% if reminder.priority == 'High' %}bg-danger{% elif reminder.priority == 'Normal' %}bg-warning{% else %}bg-success{% endif %}">
-                                    {{ reminder.priority }}
-                                </span>
-                            </small>
-                            {% if reminder.description %}
-                            <p class="mb-0 text-muted"><small>{{ reminder.description }}</small></p>
-                            {% endif %}
-                        </div>
-                        <div>
-                            <form method="POST" action="{{ url_for('complete_reminder', reminder_id=reminder.id) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-success">✓ Done</button>
-                            </form>
-                            <form method="POST" action="{{ url_for('delete_reminder', reminder_id=reminder.id) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">🗑️</button>
-                            </form>
+            <div class="glass-card p-0 mb-4 overflow-hidden">
+                <div class="px-4 py-3 bg-primary bg-opacity-5 border-bottom border-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-primary d-flex align-items-center">
+                        <i data-lucide="calendar-clock" class="icon-sm me-2"></i> Upcoming Tasks
+                    </h5>
+                    {% set upcoming = reminders|selectattr('completed', 'equalto', False)|list %}
+                    <span class="badge bg-primary rounded-pill">{{ upcoming|length }}</span>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for reminder in upcoming %}
+                    <div class="list-group-item bg-transparent px-4 py-3 border-light">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="pe-3">
+                                <div class="d-flex align-items-center mb-1">
+                                    <h6 class="mb-0 fw-bold text-dark">{{ reminder.title }}</h6>
+                                    <span class="ms-2 badge rounded-pill {% if reminder.priority == 'High' %}bg-danger{% elif reminder.priority == 'Normal' %}bg-warning text-dark{% else %}bg-success{% endif %} bg-opacity-10 text-{{ 'danger' if reminder.priority == 'High' else ('warning' if reminder.priority == 'Normal' else 'success') }}" style="font-size: 0.65rem;">
+                                        {{ reminder.priority }}
+                                    </span>
+                                </div>
+                                <div class="text-muted small d-flex align-items-center mb-2">
+                                    <i data-lucide="calendar" class="icon-xs me-1"></i>
+                                    {{ reminder.date.strftime('%d %b %Y') }}
+                                </div>
+                                {% if reminder.description %}
+                                <p class="mb-0 text-muted small opacity-75">{{ reminder.description }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex gap-2">
+                                <form method="POST" action="{{ url_for('complete_reminder', reminder_id=reminder.id) }}">
+                                    <button type="submit" class="btn btn-icon btn-sm text-success" title="Mark as Done">
+                                        <i data-lucide="check-circle-2" class="icon-sm"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('delete_reminder', reminder_id=reminder.id) }}">
+                                    <button type="submit" class="btn btn-icon btn-sm text-danger" onclick="return confirm('Remove this task?')" title="Delete">
+                                        <i data-lucide="trash-2" class="icon-sm"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
+                    {% if upcoming|length == 0 %}
+                    <div class="p-5 text-center text-muted opacity-50">
+                        <i data-lucide="check-square" class="icon-xl mb-2"></i>
+                        <p class="mb-0">All caught up! No pending tasks.</p>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endfor %}
-                {% if upcoming|length == 0 %}
-                <p class="text-muted">No upcoming reminders</p>
-                {% endif %}
             </div>
 
             <!-- Completed Reminders -->
-            <h5 class="mt-4">✓ Completed</h5>
-            <div class="list-group">
-                {% set completed = reminders|selectattr('completed', 'equalto', True)|list %}
-                {% for reminder in completed %}
-                <div class="list-group-item" style="opacity: 0.6;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1"><s>{{ reminder.title }}</s></h6>
-                            <small>{{ reminder.date.strftime('%Y-%m-%d') }}</small>
-                        </div>
-                        <form method="POST" action="{{ url_for('delete_reminder', reminder_id=reminder.id) }}" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
-                        </form>
-                    </div>
+            <div class="glass-card p-0 opacity-75 overflow-hidden">
+                <div class="px-4 py-3 border-bottom border-light">
+                    <h6 class="mb-0 fw-bold text-muted d-flex align-items-center">
+                        <i data-lucide="check-circle" class="icon-sm me-2"></i> Recently Completed
+                    </h6>
                 </div>
-                {% endfor %}
+                <div class="list-group list-group-flush">
+                    {% set completed = reminders|selectattr('completed', 'equalto', True)|list %}
+                    {% for reminder in completed %}
+                    <div class="list-group-item bg-transparent px-4 py-3 border-light border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1 text-muted text-decoration-line-through">{{ reminder.title }}</h6>
+                                <small class="text-muted">{{ reminder.date.strftime('%d %b %Y') }}</small>
+                            </div>
+                            <form method="POST" action="{{ url_for('delete_reminder', reminder_id=reminder.id) }}">
+                                <button type="submit" class="btn btn-icon btn-sm text-danger" title="Delete Permanent">
+                                    <i data-lucide="x" class="icon-sm"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if completed|length == 0 %}
+                    <div class="p-4 text-center text-muted small opacity-50">
+                        No completed tasks to show.
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+.icon-xl { width: 48px; height: 48px; }
+.list-group-item { transition: background 0.2s ease; }
+.list-group-item:hover { background: rgba(0,0,0,0.01) !important; }
+.btn-icon:hover { background: rgba(0,0,0,0.05); }
+</style>
+
 <script>
     document.getElementById('reminderDate').valueAsDate = new Date();
+</script>
+{% endblock %}
 </script>
 {% endblock %}

@@ -4,87 +4,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Smart Farmer App - Kisan Smart{% endblock %}</title>
+    <title>{% block title %}Farmate - Modern Agriculture Platform{% endblock %}</title>
     
     <!-- External Assets -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
     <div class="app-container">
         <!-- Sidebar -->
-        <nav class="sidebar animate-fade">
-            <div class="sidebar-header mb-4">
-                <a class="sidebar-brand d-flex align-items-center gap-2" href="/">
-                    <span class="fs-3">🌾</span>
-                    <span>Kisan Smart</span>
+        <nav class="sidebar">
+            <div class="sidebar-header mb-5">
+                <a class="sidebar-brand d-flex align-items-center gap-3 text-decoration-none" href="/">
+                    <div class="stat-icon-box bg-primary text-white shadow-sm" style="width: 45px; height: 45px; border-radius: 12px;">
+                        <i data-lucide="sprout"></i>
+                    </div>
+                    <span class="fs-4 fw-bold text-dark">Farmate</span>
                 </a>
             </div>
             
             <div class="nav-menu d-flex flex-column mb-auto">
-                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
-                    <i class="fas fa-home"></i> Home
-                </a>
                 <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
-                    <i class="fas fa-chart-line"></i> Dashboard
+                    <i data-lucide="layout-dashboard"></i> Dashboard
                 </a>
                 <a href="/calendar" class="nav-link {% if request.path == '/calendar' %}active{% endif %}">
-                    <i class="fas fa-calendar-alt"></i> Calendar
+                    <i data-lucide="calendar"></i> Calendar
                 </a>
                 <a href="/weather_history" class="nav-link {% if request.path == '/weather_history' %}active{% endif %}">
-                    <i class="fas fa-cloud-sun"></i> Weather
+                    <i data-lucide="cloud-sun"></i> Weather
                 </a>
                 <a href="/crops" class="nav-link {% if request.path == '/crops' %}active{% endif %}">
-                    <i class="fas fa-seedling"></i> Crops & Yield
+                    <i data-lucide="leaf"></i> Crops & Yield
                 </a>
                 <a href="/knowledge" class="nav-link {% if request.path == '/knowledge' %}active{% endif %}">
-                    <i class="fas fa-brain"></i> Knowledge Hub
+                    <i data-lucide="book-open"></i> Knowledge
                 </a>
                 <a href="/daily_log" class="nav-link {% if request.path == '/daily_log' %}active{% endif %}">
-                    <i class="fas fa-book"></i> Daily Blog
-                </a>
-                <a href="/notes" class="nav-link {% if request.path == '/notes' %}active{% endif %}">
-                    <i class="fas fa-sticky-note"></i> General Notes
+                    <i data-lucide="edit-3"></i> Daily Log
                 </a>
                 <a href="/reminders" class="nav-link {% if request.path == '/reminders' %}active{% endif %}">
-                    <i class="fas fa-bell"></i> Tasks
+                    <i data-lucide="check-square"></i> Tasks
+                </a>
+                <a href="/notes" class="nav-link {% if request.path == '/notes' %}active{% endif %}">
+                    <i data-lucide="sticky-note"></i> Notebook
+                </a>
+                <a href="/disease_log" class="nav-link {% if request.path == '/disease_log' %}active{% endif %}">
+                    <i data-lucide="shield-alert"></i> Disease Log
                 </a>
                 <a href="/reports" class="nav-link {% if request.path == '/reports' %}active{% endif %}">
-                    <i class="fas fa-file-invoice-dollar"></i> Reports
+                    <i data-lucide="bar-chart-3"></i> Reports
                 </a>
             </div>
 
-            <!-- Backup Status -->
             <div class="mt-auto">
-                <div class="glass-panel p-3 mb-3" style="background: rgba(255,255,255,0.1); border: none;">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <i class="fas fa-shield-alt text-accent"></i>
-                        <span class="small fw-bold">Data Protected</span>
+                <div class="glass-panel p-3 mb-3 border-0 bg-light" style="border-radius: 16px;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i data-lucide="shield-check" class="text-primary" style="width: 18px;"></i>
+                        <span class="small fw-bold">Cloud Sync</span>
                     </div>
-                    <div class="small opacity-75" id="sidebar-backup-status">
-                        <div id="sidebar-last-backup">Syncing...</div>
-                    </div>
-                </div>
-                <div class="text-center opacity-50 small">
-                    v1.2 Standardized
+                    <div class="small text-muted" id="sidebar-last-backup">Active</div>
                 </div>
             </div>
         </nav>
 
+        <!-- Mobile Bottom Nav -->
+        <nav class="mobile-nav">
+            <a href="/dashboard" class="mobile-nav-item {% if request.path == '/dashboard' %}active{% endif %}">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Home</span>
+            </a>
+            <a href="/calendar" class="mobile-nav-item {% if request.path == '/calendar' %}active{% endif %}">
+                <i data-lucide="calendar"></i>
+                <span>Events</span>
+            </a>
+            <a href="/daily_log" class="mobile-nav-item {% if request.path == '/daily_log' %}active{% endif %}">
+                <i data-lucide="plus-circle" style="font-size: 32px; color: var(--primary);"></i>
+                <span>Log</span>
+            </a>
+            <a href="/weather_history" class="mobile-nav-item {% if request.path == '/weather_history' %}active{% endif %}">
+                <i data-lucide="cloud-sun"></i>
+                <span>Weather</span>
+            </a>
+            <a href="/knowledge" class="mobile-nav-item {% if request.path == '/knowledge' %}active{% endif %}">
+                <i data-lucide="book-open"></i>
+                <span>Learn</span>
+            </a>
+        </nav>
+
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Mobile Navigation Trigger -->
-            <div class="d-md-none mb-4 d-flex align-items-center justify-content-between glass-panel p-3">
-                <h4 class="mb-0">🌾 Kisan Smart</h4>
-                <button class="btn btn-primary" onclick="document.querySelector('.sidebar').classList.toggle('active')">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+            <!-- Top Header Bar -->
+            <header class="top-header mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="search-container glass-panel d-none d-md-flex">
+                        <i data-lucide="search" class="icon-xs text-muted me-2"></i>
+                        <input type="text" placeholder="Search farm data..." class="border-0 bg-transparent outline-none">
+                    </div>
+                    <div class="user-actions d-flex align-items-center gap-3">
+                        <button class="btn btn-icon glass-panel">
+                            <i data-lucide="bell" class="icon-sm"></i>
+                            <span class="notification-badge"></span>
+                        </button>
+                        <div class="user-profile d-flex align-items-center gap-2 glass-panel p-1 pe-3">
+                            <div class="avatar-box bg-primary text-white">
+                                <i data-lucide="user" class="icon-xs"></i>
+                            </div>
+                            <div class="d-none d-sm-block">
+                                <p class="small fw-bold mb-0 lh-1">Farmer Bibek</p>
+                                <span class="text-muted" style="font-size: 10px;">Premium Account</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
             <div class="container-fluid">
                 {% block content %}{% endblock %}
@@ -92,8 +130,69 @@
         </main>
     </div>
 
+    <style>
+    /* Top Header Styles */
+    .top-header {
+        height: 70px;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+    }
+    .search-container {
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        width: 300px;
+        transition: all 0.3s ease;
+    }
+    .search-container:focus-within {
+        width: 350px;
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .search-container input {
+        width: 100%;
+        font-size: 0.9rem;
+        outline: none;
+    }
+    .btn-icon {
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        position: relative;
+    }
+    .notification-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 8px;
+        height: 8px;
+        background: #ff4757;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+    .user-profile {
+        border-radius: 12px;
+    }
+    .avatar-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    </style>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
         // Standardized Backup Monitoring
         function updateSidebarBackup() {
             fetch('/api/backup_status')
@@ -102,9 +201,11 @@
                     const el = document.getElementById('sidebar-last-backup');
                     if (data.last_backup) {
                         const date = new Date(data.last_backup);
-                        el.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${getTimeAgo(date)}`;
+                        el.innerHTML = `<i data-lucide="check-circle" class="text-success" style="width:14px;"></i> ${getTimeAgo(date)}`;
+                        lucide.createIcons();
                     } else {
-                        el.innerHTML = `<i class="fas fa-exclamation-triangle text-warning"></i> No Backups`;
+                        el.innerHTML = `<i data-lucide="alert-triangle" class="text-warning" style="width:14px;"></i> No Backups`;
+                        lucide.createIcons();
                     }
                 })
                 .catch(() => {});
@@ -125,4 +226,4 @@
     </script>
 </body>
 
-</html>
+</html>

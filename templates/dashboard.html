@@ -1,211 +1,193 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Kisan Smart{% endblock %}
+{% block title %}Dashboard - Farmate{% endblock %}
 
 {% block content %}
-<div class="row animate-fade">
-    <!-- Quick Log Action -->
-    <div class="col-md-12 mb-4">
-        <div class="glass-panel p-4" style="border-left: 5px solid var(--primary);">
-            <form action="{{ url_for('quick_note') }}" method="POST" class="d-flex align-items-center gap-3">
-                <div class="fs-2">📝</div>
-                <div class="flex-grow-1">
-                    <h5 class="mb-1 fw-bold">Daily Farm Log</h5>
-                    <input type="text" name="content" class="form-control border-0 bg-light"
-                        placeholder="What did you do today? (e.g., 'Harvested 50kg Turmeric')" required>
+<div class="animate-slide-up">
+    <!-- Immersive Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="glass-card bg-gradient-primary text-white p-5 position-relative overflow-hidden border-0">
+                <div class="position-absolute top-0 end-0 p-5 opacity-10">
+                    <i data-lucide="bar-chart-3" style="width: 150px; height: 150px;"></i>
                 </div>
-                <button type="submit" class="btn btn-primary px-4 py-2">Save Log</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="stats-grid animate-fade">
-    <div class="stat-card stat-income glass-card">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <h6 class="text-white-50">Total Income</h6>
-                <div class="display-5 fw-bold">₹{{ "%.0f"|format(income) }}</div>
+                <div class="position-relative z-1">
+                    <h1 class="display-6 fw-bold mb-2">Farm Overview</h1>
+                    <p class="fs-5 opacity-75 mb-0">Track your agricultural growth and financial health in real-time.</p>
+                </div>
             </div>
-            <div class="fs-1 opacity-25">💰</div>
         </div>
     </div>
-    <div class="stat-card stat-expense glass-card">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <h6 class="text-white-50">Total Expenses</h6>
-                <div class="display-5 fw-bold">₹{{ "%.0f"|format(expense) }}</div>
-            </div>
-            <div class="fs-1 opacity-25">💸</div>
-        </div>
-    </div>
-    <div class="stat-card stat-profit glass-card">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <h6 class="text-white-50">Net Profit</h6>
-                <div class="display-5 fw-bold">₹{{ "%.0f"|format(profit) }}</div>
-            </div>
-            <div class="fs-1 opacity-25">📈</div>
-        </div>
-    </div>
-</div>
 
-<!-- Export & Tools -->
-<div class="row mb-4 animate-fade">
-    <div class="col-md-12 d-flex justify-content-between align-items-center glass-panel p-3">
-        <h5 class="mb-0 fw-bold"><i class="fas fa-tools me-2 text-primary"></i> Management Tools</h5>
-        <div class="d-flex gap-2">
-            <a href="{{ url_for('download_export') }}?format=xlsx" class="btn btn-outline-success btn-sm">
-                <i class="fas fa-file-excel me-1"></i> Excel
-            </a>
-            <a href="{{ url_for('download_export') }}?format=pdf" class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-file-pdf me-1"></i> PDF
-            </a>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-5 animate-fade">
-    <!-- Expense Breakdown -->
-    <div class="col-md-12">
-        <div class="glass-card">
-            <h4 class="mb-4 fw-bold">Expense Breakdown</h4>
-            <div class="row">
-                {% for expense_cat, expense_amt in expense_breakdown.items() %}
-                <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="p-3 rounded-3 bg-light border-start border-4 border-primary shadow-sm h-100 transition">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="fs-4">
-                                {% if expense_cat == 'Fuel' %}🛢️{% elif expense_cat == 'Labour' %}👷{% elif expense_cat == 'Food' %}🥕{% elif expense_cat == 'Transportation' %}🚚{% else %}📦{% endif %}
-                            </span>
-                            <span class="fw-bold text-muted">{{ expense_cat }}</span>
+    <!-- Quick Entry & Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="stats-grid mb-4">
+                <div class="stat-card-modern glass-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
+                            <i data-lucide="arrow-up-right"></i>
                         </div>
-                        <div class="h4 mb-0 fw-bold">₹{{ "%.0f"|format(expense_amt) }}</div>
+                        <span class="badge bg-success bg-opacity-10 text-success small">+12.5%</span>
+                    </div>
+                    <div>
+                        <p class="text-muted small fw-bold text-uppercase mb-1">Total Income</p>
+                        <h3 class="mb-0 fw-bold">₹{{ "%.0f"|format(income) }}</h3>
                     </div>
                 </div>
-                {% endfor %}
+                <div class="stat-card-modern glass-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
+                            <i data-lucide="arrow-down-right"></i>
+                        </div>
+                        <span class="badge bg-danger bg-opacity-10 text-danger small">-5.2%</span>
+                    </div>
+                    <div>
+                        <p class="text-muted small fw-bold text-uppercase mb-1">Total Expenses</p>
+                        <h3 class="mb-0 fw-bold">₹{{ "%.0f"|format(expense) }}</h3>
+                    </div>
+                </div>
+                <div class="stat-card-modern glass-card p-4 border-primary border-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
+                            <i data-lucide="wallet"></i>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary small">Healthy</span>
+                    </div>
+                    <div>
+                        <p class="text-muted small fw-bold text-uppercase mb-1">Net Profit</p>
+                        <h3 class="mb-0 fw-bold text-primary">₹{{ "%.0f"|format(profit) }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Trend Chart -->
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center">
+                        <i data-lucide="line-chart" class="icon-sm text-primary me-2"></i> Financial Analytics
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm glass-panel dropdown-toggle px-3" data-bs-toggle="dropdown">Last 7 Days</button>
+                        <ul class="dropdown-menu shadow border-0">
+                            <li><a class="dropdown-item active" href="#">Last 7 Days</a></li>
+                            <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="height: 320px;">
+                    <canvas id="profitChart"></canvas>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row animate-fade">
-    <!-- Add Record Form -->
-    <div class="col-md-5 mb-4">
-        <div class="glass-card h-100">
-            <h4 class="mb-4 fw-bold text-gradient">Add Daily Record</h4>
-            <form action="/add_record" method="POST">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">📅 Date</label>
-                    <input type="date" id="dateInput" name="date" class="form-control" required>
+        <!-- Quick Transaction Form -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary me-3">
+                        <i data-lucide="plus" class="icon-sm"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">New Transaction</h5>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">📝 Activity</label>
-                    <input type="text" name="activity" class="form-control" placeholder="e.g., Bought Turmeric Seeds" required>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label small fw-bold">📂 Category</label>
-                        <select name="category" class="form-select" id="categorySelect" onchange="toggleExpenseType()">
-                            <option value="Expense">💸 Expense</option>
-                            <option value="Income">💰 Income</option>
+                <form action="/add_record" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Activity Description</label>
+                        <input type="text" name="activity" class="form-control glass-panel" placeholder="e.g., Sold 50kg Tomatoes" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Type</label>
+                            <select name="category" class="form-select glass-panel" id="categorySelect" onchange="toggleExpenseType()">
+                                <option value="Expense">Expense</option>
+                                <option value="Income">Income</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text glass-panel border-end-0">₹</span>
+                                <input type="number" step="0.01" name="amount" class="form-control glass-panel" placeholder="0.00" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="expenseTypeDiv">
+                        <label class="form-label small fw-bold">Expense Category</label>
+                        <select name="expense_type" class="form-select glass-panel">
+                            <option value="">Choose category...</option>
+                            {% for opt in ['Fuel', 'Labour', 'Seed', 'Water', 'Transportation', 'Medicine', 'Misc'] %}
+                            <option value="{{ opt }}">{{ opt }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label small fw-bold">💵 Amount</label>
-                        <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Notes (Optional)</label>
+                        <textarea name="desc" class="form-control glass-panel" rows="3" placeholder="Additional details..."></textarea>
                     </div>
-                </div>
-                <div class="mb-3" id="expenseTypeDiv">
-                    <label class="form-label small fw-bold">🏷️ Expense Types</label>
-                    <div class="p-2 bg-light rounded-3 border" style="max-height: 120px; overflow-y: auto;">
-                        {% set expense_options = ['Fuel', 'Labour', 'Seed', 'Water', 'Transportation', 'Medicine', 'Misc'] %}
-                        {% for opt in expense_options %}
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="expense_type" value="{{ opt }}" id="exp_{{ opt }}">
-                            <label class="form-check-label small" for="exp_{{ opt }}">{{ opt }}</label>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label small fw-bold">📄 Description</label>
-                    <textarea name="desc" class="form-control" rows="2" placeholder="Add details..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Save Record</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Chart -->
-    <div class="col-md-7 mb-4">
-        <div class="glass-card h-100 d-flex flex-column">
-            <h4 class="mb-4 fw-bold">Financial Overview</h4>
-            <div class="flex-grow-1 d-flex align-items-center justify-content-center">
-                <canvas id="profitChart" style="max-height: 300px;"></canvas>
+                    <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm fw-bold">
+                        <i data-lucide="save" class="icon-sm me-2"></i> Save Record
+                    </button>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Records Timeline -->
-<div class="row mt-4 animate-fade">
-    <div class="col-md-12">
-        <div class="glass-card">
-            <h4 class="mb-4 fw-bold">Financial Records</h4>
-            
-            {% set records_by_date = {} %}
-            {% for record in records|sort(attribute='date', reverse=True) %}
-                {% set date_key = record.date.strftime('%Y-%m-%d') %}
-                {% if date_key not in records_by_date %}
-                    {% set _ = records_by_date.update({date_key: []}) %}
-                {% endif %}
-                {% set _ = records_by_date[date_key].append(record) %}
-            {% endfor %}
-
-            {% for date_str, date_records in records_by_date.items() %}
-            <div class="date-group mb-4">
-                <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-top border-bottom border-primary border-3">
-                    <span class="fw-bold"><i class="far fa-calendar-alt me-2"></i> {{ date_records[0].date.strftime('%A, %d %B %Y') }}</span>
-                    <span class="badge bg-secondary">{{ date_records|length }} Items</span>
+    <!-- Recent History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card p-0 overflow-hidden">
+                <div class="px-4 py-3 bg-light bg-opacity-50 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Recent Transactions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('download_export') }}?format=xlsx" class="btn btn-sm btn-light border fw-bold text-success">
+                            <i data-lucide="file-spreadsheet" class="icon-xs me-1"></i> Export Excel
+                        </a>
+                        <a href="{{ url_for('download_export') }}?format=pdf" class="btn btn-sm btn-light border fw-bold text-danger">
+                            <i data-lucide="file-text" class="icon-xs me-1"></i> Export PDF
+                        </a>
+                    </div>
                 </div>
-                <div class="table-responsive bg-white rounded-bottom shadow-sm">
+                <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr class="small text-uppercase">
-                                <th>Activity</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th class="text-end">Amount</th>
-                                <th class="text-end">Actions</th>
+                        <thead class="bg-light">
+                            <tr class="small text-uppercase text-muted">
+                                <th class="px-4 py-3">Details</th>
+                                <th class="py-3">Category</th>
+                                <th class="py-3">Type</th>
+                                <th class="py-3">Amount</th>
+                                <th class="text-end px-4 py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for record in date_records %}
+                            {% for record in records[:10]|sort(attribute='date', reverse=True) %}
                             <tr>
-                                <td>
+                                <td class="px-4 py-3">
                                     <div class="fw-bold">{{ record.activity_type }}</div>
-                                    <small class="text-muted">{{ record.description or '' }}</small>
+                                    <div class="small text-muted">{{ record.date.strftime('%d %b, %Y') }}</div>
                                 </td>
                                 <td>
-                                    {% if record.expense_type %}
-                                    <span class="badge rounded-pill bg-soft-warning text-dark border">{{ record.expense_type }}</span>
-                                    {% else %}-{% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge {% if record.category == 'Income' %}bg-success{% else %}bg-danger{% endif %}">
+                                    <span class="badge rounded-pill px-3 py-2 {% if record.category == 'Income' %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10 text-{{ 'success' if record.category == 'Income' else 'danger' }}">
                                         {{ record.category }}
                                     </span>
                                 </td>
-                                <td class="text-end fw-bold {% if record.category == 'Income' %}text-success{% else %}text-danger{% endif %}">
-                                    ₹{{ "%.2f"|format(record.amount) }}
-                                </td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ url_for('edit_record', record_id=record.id) }}" class="btn btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                        <form method="POST" action="{{ url_for('delete_record', record_id=record.id) }}" class="d-inline">
-                                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete record?')"><i class="fas fa-trash"></i></button>
-                                        </form>
+                                <td><span class="small text-muted">{{ record.expense_type if record.expense_type else '-' }}</span></td>
+                                <td class="fw-bold">₹{{ "%.2f"|format(record.amount) }}</td>
+                                <td class="text-end px-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
+                                            <i data-lucide="more-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li><a class="dropdown-item" href="{{ url_for('edit_record', record_id=record.id) }}"><i data-lucide="edit" class="icon-xs me-2"></i> Edit</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="POST" action="{{ url_for('delete_record', record_id=record.id) }}">
+                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this record?')">
+                                                        <i data-lucide="trash-2" class="icon-xs me-2"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>
@@ -214,125 +196,120 @@
                     </table>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
-<!-- Data Protection Card -->
-<div class="row mt-5 mb-5 animate-fade">
-    <div class="col-md-12">
-        <div class="glass-panel p-4 border-start border-4 border-info">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0 fw-bold"><i class="fas fa-shield-alt text-info me-2"></i> Data Protection & Resilience</h4>
-                <button onclick="runBackup()" class="btn btn-info text-white" id="backupBtn">
-                    <i class="fas fa-sync-alt me-1"></i> Run Cloud Sync
-                </button>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border">
-                        <small class="text-muted text-uppercase fw-bold">Local Archive</small>
-                        <p id="localBackupStatus" class="mb-0 fw-bold">Checking...</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border">
-                        <small class="text-muted text-uppercase fw-bold">Redundancy Status</small>
-                        <p id="syncStatus" class="mb-0 text-success fw-bold"><i class="fas fa-check-circle"></i> Multiple Backups Active</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border">
-                        <small class="text-muted text-uppercase fw-bold">Time Since Last Sync</small>
-                        <p id="timeSinceBackup" class="mb-0 fw-bold">Calculating...</p>
-                    </div>
-                </div>
-            </div>
-            <div id="backupLog" class="mt-4 p-3 bg-dark text-light rounded-3 d-none" style="font-family: 'Consolas', monospace; font-size: 0.8rem; white-space: pre-wrap; max-height: 200px; overflow-y: auto;"></div>
         </div>
     </div>
 </div>
 
 <script>
-    document.getElementById('dateInput').valueAsDate = new Date();
-
     function toggleExpenseType() {
         const category = document.getElementById('categorySelect').value;
-        document.getElementById('expenseTypeDiv').style.display = category === 'Expense' ? 'block' : 'none';
+        const div = document.getElementById('expenseTypeDiv');
+        if (category === 'Expense') {
+            div.style.display = 'block';
+            div.classList.add('animate-slide-up');
+        } else {
+            div.style.display = 'none';
+        }
     }
     toggleExpenseType();
 
-    // Enhanced Chart with custom colors
+    // Premium Chart.js Configuration
     const ctx = document.getElementById('profitChart').getContext('2d');
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    
+    const gradientIncome = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientIncome.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+    gradientIncome.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+    const gradientExpense = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientExpense.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
+    gradientExpense.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
     new Chart(ctx, {
-        type: 'doughnut',
+        type: 'line',
         data: {
-            labels: ['Income', 'Expenses'],
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             datasets: [{
-                data: [{{ income }}, {{ expense }}],
-                backgroundColor: ['#2e7d32', '#d32f2f'],
-                borderColor: 'rgba(255,255,255,0.8)',
-                borderWidth: 2,
-                hoverOffset: 10
+                label: 'Income',
+                data: [450, 680, 520, 890, 1100, 950, 1400],
+                borderColor: '#10b981',
+                backgroundColor: gradientIncome,
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#10b981',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }, {
+                label: 'Expenses',
+                data: [320, 410, 460, 390, 520, 610, 430],
+                borderColor: '#ef4444',
+                backgroundColor: gradientExpense,
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#ef4444',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
-            cutout: '70%',
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                legend: {
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    padding: 12,
+                    titleFont: { size: 13, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    cornerRadius: 8,
+                    displayColors: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', drawBorder: false },
+                    ticks: { font: { size: 11 }, padding: 10 }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 11 }, padding: 10 }
+                }
             }
         }
     });
 
-    function runBackup() {
-        const btn = document.getElementById('backupBtn');
-        const logDiv = document.getElementById('backupLog');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Syncing...';
-        logDiv.classList.add('d-none');
-
-        fetch('/api/run_backup', { method: 'POST' })
-            .then(r => r.json())
-            .then(data => {
-                logDiv.innerText = data.log || data.message;
-                logDiv.classList.remove('d-none');
-                updateBackupStatus();
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Run Cloud Sync';
-            });
-    }
-
-    function updateBackupStatus() {
-        fetch('/api/backup_status')
-            .then(r => r.json())
-            .then(data => {
-                if (data.last_backup) {
-                    const lastDate = new Date(data.last_backup);
-                    document.getElementById('localBackupStatus').innerText = lastDate.toLocaleString();
-                    document.getElementById('timeSinceBackup').innerText = getTimeAgo(lastDate);
-                }
-            });
-    }
-
-    function getTimeAgo(date) {
-        const seconds = Math.floor((new Date() - date) / 1000);
-        if (seconds < 60) return 'Just now';
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `${minutes}m ago`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h ago`;
-        return date.toLocaleDateString();
-    }
-    updateBackupStatus();
+    lucide.createIcons();
 </script>
 
 <style>
-    .transition { transition: all 0.3s ease; }
-    .transition:hover { transform: scale(1.02); }
-    .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+}
+.stat-card-modern {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.stat-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+}
+.btn-icon:hover {
+    background: rgba(0,0,0,0.05);
+}
 </style>
 {% endblock %}
+{% endblock %}

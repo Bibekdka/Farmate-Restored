@@ -1,67 +1,134 @@
 {% extends 'base.html' %}
 
+{% block title %}Edit Transaction - Farmate{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-6">
-        <div class="card p-4">
-            <h4>✏️ Edit Farm Record</h4>
-            <form action="{{ url_for('edit_record', record_id=record.id) }}" method="POST">
-                <div class="mb-3">
-                    <label>Date</label>
-                    <input type="date" name="date" class="form-control" value="{{ record.date.strftime('%Y-%m-%d') }}"
-                        required>
-                </div>
-                <div class="mb-3">
-                    <label>Activity Name</label>
-                    <input type="text" name="activity" class="form-control" value="{{ record.activity_type }}"
-                        placeholder="e.g. Bought Seeds" required>
-                </div>
-                <div class="mb-3">
-                    <label>Category</label>
-                    <select name="category" class="form-select" id="categorySelect" onchange="toggleExpenseType()">
-                        <option value="Expense" {% if record.category=='Expense' %}selected{% endif %}>Expense (Cost)
-                        </option>
-                        <option value="Income" {% if record.category=='Income' %}selected{% endif %}>Income (Sales)
-                        </option>
-                    </select>
-                </div>
-                <div class="mb-3" id="expenseTypeDiv">
-                    <label class="form-label fw-600">🏷️ Expense Type (Select Multiple)</label>
-                    <div class="border p-2 rounded" style="max-height: 150px; overflow-y: auto; background: #fff;">
-                        {% set current_types = record.expense_type.split(', ') if record.expense_type else [] %}
-                        {% set expense_options = ['Fuel', 'Labour', 'Seed', 'Water', 'Transportation', 'Medicine',
-                        'Misc'] %}
-                        {% for opt in expense_options %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="expense_type" value="{{ opt }}"
-                                id="exp_{{ opt }}" {% if opt in current_types %}checked{% endif %}>
-                            <label class="form-check-label" for="exp_{{ opt }}">
-                                {% if opt == 'Fuel' %}🛢️{% elif opt == 'Labour' %}👷{% elif opt == 'Seed' %}🌱{% elif
-                                opt == 'Water' %}💧{% elif opt == 'Transportation' %}🚚{% elif opt == 'Medicine' %}💊{%
-                                else %}📦{% endif %}
-                                {{ opt }}
-                            </label>
+<div class="animate-slide-up">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-icon glass-panel">
+            <i data-lucide="arrow-left" class="icon-sm"></i>
+        </a>
+        <h2 class="text-gradient mb-0">Edit Transaction</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="glass-card p-4 p-md-5">
+                <form action="{{ url_for('edit_record', record_id=record.id) }}" method="POST">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Transaction Date</label>
+                            <input type="date" name="date" class="form-control glass-panel border-0 px-3" value="{{ record.date.strftime('%Y-%m-%d') }}" required>
                         </div>
-                        {% endfor %}
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Transaction Type</label>
+                            <select name="category" class="form-select glass-panel border-0 px-3" id="categorySelect" onchange="toggleExpenseType()">
+                                <option value="Expense" {% if record.category == 'Expense' %}selected{% endif %}>Expense (Cash Out)</option>
+                                <option value="Income" {% if record.category == 'Income' %}selected{% endif %}>Income (Cash In)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Activity Name</label>
+                            <div class="input-group glass-panel overflow-hidden">
+                                <span class="input-group-text border-0 bg-transparent ps-3">
+                                    <i data-lucide="shopping-cart" class="icon-xs text-primary"></i>
+                                </span>
+                                <input type="text" name="activity" class="form-control border-0 bg-transparent ps-2" value="{{ record.activity_type }}" placeholder="e.g. Bulk Seed Purchase" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12" id="expenseTypeDiv">
+                            <label class="form-label small fw-bold text-muted">Expense Categories</label>
+                            <div class="glass-panel p-3 rounded-4" style="max-height: 200px; overflow-y: auto;">
+                                {% set current_types = record.expense_type.split(', ') if record.expense_type else [] %}
+                                {% set expense_options = [
+                                    ('Fuel', 'fuel'), ('Labour', 'users'), ('Seed', 'sprout'), 
+                                    ('Water', 'droplets'), ('Transportation', 'truck'), 
+                                    ('Medicine', 'pill'), ('Misc', 'box')
+                                ] %}
+                                <div class="row g-2">
+                                    {% for opt, icon in expense_options %}
+                                    <div class="col-6 col-sm-4">
+                                        <div class="form-check custom-check glass-card p-2 border-0">
+                                            <input class="form-check-input" type="checkbox" name="expense_type" value="{{ opt }}"
+                                                id="exp_{{ opt }}" {% if opt in current_types %}checked{% endif %}>
+                                            <label class="form-check-label d-flex align-items-center gap-2" for="exp_{{ opt }}">
+                                                <i data-lucide="{{ icon }}" class="icon-xs"></i>
+                                                {{ opt }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Amount (₹)</label>
+                            <div class="input-group glass-panel overflow-hidden py-1">
+                                <span class="input-group-text border-0 bg-transparent ps-3 fs-5 fw-bold text-primary">₹</span>
+                                <input type="number" step="0.01" name="amount" class="form-control border-0 bg-transparent ps-2 fs-4 fw-bold" value="{{ record.amount }}" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Detailed Description</label>
+                            <textarea name="desc" class="form-control glass-panel border-0 px-3 py-3" rows="3" placeholder="Add more details about this transaction...">{{ record.description or '' }}</textarea>
+                        </div>
+
+                        <div class="col-md-12 mt-4">
+                            <div class="d-flex gap-3">
+                                <button type="submit" class="btn btn-primary px-5 py-3 d-flex align-items-center">
+                                    <i data-lucide="check-circle" class="icon-sm me-2"></i> Update Transaction
+                                </button>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-light px-4 py-3">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="glass-card p-4 h-100 border-0" style="background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1) 0%, rgba(var(--primary-rgb), 0.05) 100%);">
+                <div class="text-center mb-4 pt-3">
+                    <div class="stat-icon-box bg-white text-primary mx-auto shadow-sm mb-3" style="width: 60px; height: 60px; border-radius: 20px;">
+                        <i data-lucide="receipt" class="icon-md"></i>
+                    </div>
+                    <h4 class="fw-bold">Financial Integrity</h4>
+                    <p class="text-muted small">Maintain accurate records for better tax planning and farm profitability analysis.</p>
+                </div>
+                
+                <div class="d-flex flex-column gap-3">
+                    <div class="glass-card p-3 bg-white border-0 shadow-sm">
+                        <p class="small fw-bold mb-1"><i data-lucide="lightbulb" class="icon-xs text-warning me-2"></i>Smart Categorization</p>
+                        <p class="small text-muted mb-0">Use the multiple expense types for detailed tracking of your production costs.</p>
+                    </div>
+                    <div class="glass-card p-3 bg-white border-0 shadow-sm">
+                        <p class="small fw-bold mb-1"><i data-lucide="clock" class="icon-xs text-primary me-2"></i>Audit Trail</p>
+                        <p class="small text-muted mb-0">Every modification is logged to ensure the integrity of your farm's financial data.</p>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label>Amount</label>
-                    <input type="number" step="0.01" name="amount" class="form-control" value="{{ record.amount }}"
-                        required>
-                </div>
-                <div class="mb-3">
-                    <label>Description (Optional)</label>
-                    <input type="text" name="desc" class="form-control" value="{{ record.description or '' }}">
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-success">Update Record</button>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.custom-check {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.custom-check:hover {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+}
+.form-check-input:checked + .form-check-label {
+    color: var(--primary);
+    font-weight: 600;
+}
+</style>
 
 <script>
     function toggleExpenseType() {
@@ -69,6 +136,7 @@
         const expenseTypeDiv = document.getElementById('expenseTypeDiv');
         expenseTypeDiv.style.display = category === 'Expense' ? 'block' : 'none';
     }
-    toggleExpenseType(); // Run on page load
+    toggleExpenseType();
+    lucide.createIcons();
 </script>
-{% endblock %}
+{% endblock %}

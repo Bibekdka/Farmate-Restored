@@ -1,58 +1,133 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<h2>✏️ Edit Crop</h2>
+{% block title %}Edit Crop - Farmate{% endblock %}
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card p-4">
-            <form action="{{ url_for('edit_crop', crop_id=crop.id) }}" method="POST">
-                <div class="mb-3">
-                    <label>Crop Name</label>
-                    <input type="text" name="crop_name" class="form-control" value="{{ crop.crop_name }}" required>
-                </div>
-                <div class="mb-3">
-                    <label>Variety</label>
-                    <input type="text" name="variety" class="form-control" value="{{ crop.variety or '' }}">
-                </div>
-                <div class="mb-3">
-                    <label>Season</label>
-                    <select name="season" class="form-select">
-                        <option {% if crop.season == 'Summer' %}selected{% endif %}>Summer</option>
-                        <option {% if crop.season == 'Rainy' %}selected{% endif %}>Rainy</option>
-                        <option {% if crop.season == 'Winter' %}selected{% endif %}>Winter</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Area/Plot</label>
-                    <input type="text" name="area" class="form-control" value="{{ crop.area or '' }}">
-                </div>
-                <div class="mb-3">
-                    <label>Sowing Date</label>
-                    <input type="date" name="sowing_date" class="form-control" value="{{ crop.sowing_date.strftime('%Y-%m-%d') if crop.sowing_date else '' }}">
-                </div>
-                <div class="mb-3">
-                    <label>Expected Harvest Date</label>
-                    <input type="date" name="expected_harvest" class="form-control" value="{{ crop.expected_harvest.strftime('%Y-%m-%d') if crop.expected_harvest else '' }}">
-                </div>
-                <div class="mb-3">
-                    <label>Status</label>
-                    <select name="status" class="form-select">
-                        <option {% if crop.status == 'Active' %}selected{% endif %}>Active</option>
-                        <option {% if crop.status == 'Harvested' %}selected{% endif %}>Harvested</option>
-                        <option {% if crop.status == 'Failed' %}selected{% endif %}>Failed</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Notes</label>
-                    <textarea name="notes" class="form-control" rows="3">{{ crop.notes or '' }}</textarea>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-success">Update Crop</button>
-                    <a href="{{ url_for('crops') }}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
+{% block content %}
+<div class="animate-slide-up">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{{ url_for('crops') }}" class="btn btn-icon glass-panel">
+            <i data-lucide="arrow-left" class="icon-sm"></i>
+        </a>
+        <h2 class="text-gradient mb-0">Edit Crop Details</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="glass-card p-4 p-md-5">
+                <form action="{{ url_for('edit_crop', crop_id=crop.id) }}" method="POST">
+                    <div class="row g-4">
+                        <!-- Basic Info -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Crop Name</label>
+                            <div class="input-group glass-panel overflow-hidden">
+                                <span class="input-group-text border-0 bg-transparent ps-3">
+                                    <i data-lucide="leaf" class="icon-xs text-primary"></i>
+                                </span>
+                                <input type="text" name="crop_name" class="form-control border-0 bg-transparent ps-2" value="{{ crop.crop_name }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Variety</label>
+                            <div class="input-group glass-panel overflow-hidden">
+                                <span class="input-group-text border-0 bg-transparent ps-3">
+                                    <i data-lucide="tag" class="icon-xs text-primary"></i>
+                                </span>
+                                <input type="text" name="variety" class="form-control border-0 bg-transparent ps-2" value="{{ crop.variety or '' }}">
+                            </div>
+                        </div>
+
+                        <!-- Season & Plot -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Season</label>
+                            <select name="season" class="form-select glass-panel border-0 px-3">
+                                <option {% if crop.season == 'Summer' %}selected{% endif %}>Summer</option>
+                                <option {% if crop.season == 'Rainy' %}selected{% endif %}>Rainy</option>
+                                <option {% if crop.season == 'Winter' %}selected{% endif %}>Winter</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Area/Plot</label>
+                            <div class="input-group glass-panel overflow-hidden">
+                                <span class="input-group-text border-0 bg-transparent ps-3">
+                                    <i data-lucide="map-pin" class="icon-xs text-primary"></i>
+                                </span>
+                                <input type="text" name="area" class="form-control border-0 bg-transparent ps-2" value="{{ crop.area or '' }}">
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Sowing Date</label>
+                            <input type="date" name="sowing_date" class="form-control glass-panel border-0 px-3" value="{{ crop.sowing_date.strftime('%Y-%m-%d') if crop.sowing_date else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Expected Harvest</label>
+                            <input type="date" name="expected_harvest" class="form-control glass-panel border-0 px-3" value="{{ crop.expected_harvest.strftime('%Y-%m-%d') if crop.expected_harvest else '' }}">
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Current Status</label>
+                            <div class="d-flex gap-3 flex-wrap mt-2">
+                                <input type="radio" class="btn-check" name="status" id="status-active" value="Active" {% if crop.status == 'Active' %}checked{% endif %}>
+                                <label class="btn btn-outline-success border-2 px-4 py-2" for="status-active">
+                                    <i data-lucide="activity" class="icon-xs me-2"></i>Active
+                                </label>
+
+                                <input type="radio" class="btn-check" name="status" id="status-harvested" value="Harvested" {% if crop.status == 'Harvested' %}checked{% endif %}>
+                                <label class="btn btn-outline-primary border-2 px-4 py-2" for="status-harvested">
+                                    <i data-lucide="check-circle" class="icon-xs me-2"></i>Harvested
+                                </label>
+
+                                <input type="radio" class="btn-check" name="status" id="status-failed" value="Failed" {% if crop.status == 'Failed' %}checked{% endif %}>
+                                <label class="btn btn-outline-danger border-2 px-4 py-2" for="status-failed">
+                                    <i data-lucide="x-circle" class="icon-xs me-2"></i>Failed
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Observations & Notes</label>
+                            <textarea name="notes" class="form-control glass-panel border-0 px-3 py-3" rows="4">{{ crop.notes or '' }}</textarea>
+                        </div>
+
+                        <div class="col-md-12 mt-4">
+                            <div class="d-flex gap-3">
+                                <button type="submit" class="btn btn-primary px-5 py-3 d-flex align-items-center">
+                                    <i data-lucide="save" class="icon-sm me-2"></i> Update Crop Data
+                                </button>
+                                <a href="{{ url_for('crops') }}" class="btn btn-light px-4 py-3">Discard Changes</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100 bg-primary text-white">
+                <h4 class="fw-bold mb-4">Editing Guidance</h4>
+                <ul class="list-unstyled d-flex flex-column gap-4 opacity-90">
+                    <li class="d-flex gap-3">
+                        <i data-lucide="info" class="icon-sm flex-shrink-0"></i>
+                        <p class="small mb-0">Updating the status to <b>Harvested</b> will allow you to record final yield data.</p>
+                    </li>
+                    <li class="d-flex gap-3">
+                        <i data-lucide="calendar" class="icon-sm flex-shrink-0"></i>
+                        <p class="small mb-0">Reviewing dates helps maintain accurate records for season-over-season analysis.</p>
+                    </li>
+                    <li class="d-flex gap-3">
+                        <i data-lucide="database" class="icon-sm flex-shrink-0"></i>
+                        <p class="small mb-0">All changes are reflected in real-time on your dashboard and generated reports.</p>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
-{% endblock %}
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

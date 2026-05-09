@@ -1,87 +1,152 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
+
+{% block title %}Calendar - Farmate{% endblock %}
 
 {% block content %}
-<h2>📅 Calendar View</h2>
-
-<div class="card mb-4 p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <a href="{{ url_for('calendar_view', year=prev_year, month=prev_month) }}" class="btn btn-secondary">&larr;
-            Previous</a>
-        <h3>{{ month_name }} {{ year }}</h3>
-        <a href="{{ url_for('calendar_view', year=next_year, month=next_month) }}" class="btn btn-secondary">Next
-            &rarr;</a>
+<div class="animate-slide-up">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-7">
+            <h2 class="text-gradient mb-1">Farm Calendar</h2>
+            <p class="text-muted">Plan your planting schedules and track daily activities.</p>
+        </div>
+        <div class="col-md-5">
+            <div class="d-flex align-items-center justify-content-md-end gap-3">
+                <div class="d-flex align-items-center btn-glass p-1 rounded-pill">
+                    <a href="{{ url_for('calendar_view', year=prev_year, month=prev_month) }}" class="btn btn-icon rounded-circle">
+                        <i data-lucide="chevron-left" class="icon-sm"></i>
+                    </a>
+                    <h5 class="mb-0 px-3 fw-bold text-dark fs-6">{{ month_name }} {{ year }}</h5>
+                    <a href="{{ url_for('calendar_view', year=next_year, month=next_month) }}" class="btn btn-icon rounded-circle">
+                        <i data-lucide="chevron-right" class="icon-sm"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Calendar Grid -->
-    <div class="table-responsive">
-        <table class="table table-bordered text-center">
-            <thead class="table-success">
-                <tr>
-                    <th>Sun</th>
-                    <th>Mon</th>
-                    <th>Tue</th>
-                    <th>Wed</th>
-                    <th>Thu</th>
-                    <th>Fri</th>
-                    <th>Sat</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for week in cal_matrix %}
-                <tr style="height: 120px;">
-                    {% for day in week %}
-                    <td class="align-top"
-                        style="background-color: {% if day == 0 %}#f0f0f0{% elif day == today.day and year == today.year and month == today.month %}#e7f5e7{% else %}white{% endif %}; vertical-align: top; position: relative;">
-                        {% if day != 0 %}
-                        <div style="font-weight: bold; margin-bottom: 5px;">{{ day }}</div>
-                        {% if day in events_by_date %}
-                        <div style="font-size: 0.8em;">
-                            {% if events_by_date[day]['records'] %}
-                            {% for record in events_by_date[day]['records'][:2] %}
-                            <span class="badge bg-info mb-1 d-block text-truncate" title="{{ record.activity_type }}">{{
-                                record.activity_type }}</span>
-                            {% endfor %}
-                            {% if events_by_date[day]['records']|length > 2 %}
-                            <span class="badge bg-secondary">+{{ events_by_date[day]['records']|length - 2 }}
-                                more</span>
+    <div class="glass-card p-0 overflow-hidden shadow-premium">
+        <div class="table-responsive">
+            <table class="table table-borderless text-center mb-0 calendar-table">
+                <thead>
+                    <tr class="bg-primary bg-opacity-5">
+                        <th class="py-3 text-danger small text-uppercase fw-bold ls-1">Sun</th>
+                        <th class="py-3 small text-uppercase fw-bold ls-1">Mon</th>
+                        <th class="py-3 small text-uppercase fw-bold ls-1">Tue</th>
+                        <th class="py-3 small text-uppercase fw-bold ls-1">Wed</th>
+                        <th class="py-3 small text-uppercase fw-bold ls-1">Thu</th>
+                        <th class="py-3 small text-uppercase fw-bold ls-1">Fri</th>
+                        <th class="py-3 text-primary small text-uppercase fw-bold ls-1">Sat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in cal_matrix %}
+                    <tr>
+                        {% for day in week %}
+                        {% set is_today = (day == today.day and year == today.year and month == today.month) %}
+                        <td class="calendar-day {% if day == 0 %}bg-light bg-opacity-30{% endif %} {% if is_today %}current-day{% endif %}"
+                            style="height: 130px; width: 14.28%; vertical-align: top; border: 1px solid rgba(0,0,0,0.03);">
+                            {% if day != 0 %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                                <span class="day-number {{ 'text-primary fw-bold' if is_today else 'text-muted' }}">{{ day }}</span>
+                                {% if is_today %}<span class="badge bg-primary rounded-pill" style="font-size: 0.6rem;">TODAY</span>{% endif %}
+                            </div>
+                            
+                            <div class="event-container px-1">
+                                {% if day in events_by_date %}
+                                    {% for record in events_by_date[day]['records'][:2] %}
+                                    <div class="event-pill bg-success-soft text-success mb-1" title="{{ record.activity_type }}">
+                                        <i data-lucide="sprout" class="icon-xs me-1"></i> {{ record.activity_type }}
+                                    </div>
+                                    {% endfor %}
+                                    
+                                    {% for reminder in events_by_date[day]['reminders'][:2] %}
+                                    <div class="event-pill mb-1 {% if reminder.priority == 'High' %}bg-danger-soft text-danger{% else %}bg-warning-soft text-warning{% endif %}" 
+                                         title="{{ reminder.title }}">
+                                        <i data-lucide="bell" class="icon-xs me-1"></i> {{ reminder.title }}
+                                    </div>
+                                    {% endfor %}
+                                    
+                                    {% set extra = (events_by_date[day]['records']|length + events_by_date[day]['reminders']|length) - 4 %}
+                                    {% if extra > 0 %}
+                                    <div class="x-small text-muted fw-bold ps-1">+{{ extra }} more</div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                             {% endif %}
-                            {% endif %}
-                            {% if events_by_date[day]['reminders'] %}
-                            {% for reminder in events_by_date[day]['reminders'][:1] %}
-                            <span
-                                class="badge {% if reminder.priority == 'High' %}bg-danger{% elif reminder.priority == 'Normal' %}bg-warning{% else %}bg-light text-dark{% endif %} mb-1 d-block text-truncate"
-                                title="{{ reminder.title }}">🔔
-                                {{ reminder.title }}</span>
-                            {% endfor %}
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                        {% endif %}
-                    </td>
+                        </td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Legend & Actions -->
+    <div class="row mt-4 g-4">
+        <div class="col-md-7">
+            <div class="glass-card p-4 h-100">
+                <h6 class="fw-bold mb-3 text-muted ls-1">ACTIVITY LEGEND</h6>
+                <div class="d-flex flex-wrap gap-4">
+                    <div class="d-flex align-items-center">
+                        <span class="legend-dot bg-success me-2"></span>
+                        <span class="small fw-medium">Farm Activity</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="legend-dot bg-danger me-2"></span>
+                        <span class="small fw-medium">High Priority</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="legend-dot bg-warning me-2"></span>
+                        <span class="small fw-medium">Reminder</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="legend-dot border border-primary me-2" style="background: rgba(var(--primary-rgb), 0.1)"></span>
+                        <span class="small fw-medium">Current Day</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="glass-card p-4 h-100 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-1">Quick Management</h6>
+                    <p class="text-muted small mb-0">Update your farm schedule</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('reminders') }}" class="btn btn-sm btn-glass">Add Task</a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-primary">Add Record</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Legend -->
-<div class="row">
-    <div class="col-md-6">
-        <div class="card p-3">
-            <h5>📋 Legend</h5>
-            <p><span class="badge bg-info">Activity</span> - Farm activity</p>
-            <p><span class="badge bg-danger">High</span> - High priority reminder</p>
-            <p><span class="badge bg-warning">Normal</span> - Normal priority reminder</p>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card p-3">
-            <h5>🔗 Quick Links</h5>
-            <a href="{{ url_for('reminders') }}" class="btn btn-sm btn-warning">📝 Add Reminder</a>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-success">➕ Add Activity</a>
-        </div>
-    </div>
-</div>
+<style>
+.calendar-day { transition: all 0.2s ease; position: relative; }
+.calendar-day:hover:not(.bg-light) { background: rgba(var(--primary-rgb), 0.02) !important; cursor: pointer; }
+.current-day { background: rgba(var(--primary-rgb), 0.04) !important; position: relative; }
+.current-day::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--primary); }
+.day-number { font-size: 1rem; }
+.event-pill { 
+    font-size: 0.65rem; 
+    padding: 3px 6px; 
+    border-radius: 4px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    font-weight: 600; 
+    text-align: left; 
+    display: flex;
+    align-items: center;
+}
+.bg-success-soft { background: rgba(34, 197, 94, 0.12); }
+.bg-danger-soft { background: rgba(239, 68, 68, 0.12); }
+.bg-warning-soft { background: rgba(245, 158, 11, 0.12); }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.ls-1 { letter-spacing: 1px; }
+.shadow-premium { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05); }
+</style>
 {% endblock %}
+%}

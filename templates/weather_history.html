@@ -1,94 +1,130 @@
 {% extends 'base.html' %}
 
+{% block title %}Weather History - Farmate{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>🌤️ Weather History</h2>
-                <div>
-                    <button onclick="runHistoricalWeather()" class="btn btn-sm btn-outline-primary me-2"
-                        id="histWeatherBtn">
-                        🔄 Add Missing History
-                    </button>
-                    <span class="badge bg-primary">Total Records: {{ logs|length }}</span>
-                </div>
+<div class="animate-slide-up">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="text-gradient mb-1">Weather Insights</h2>
+            <p class="text-muted">Review historical climate patterns and rainfall data.</p>
+        </div>
+        <div class="col-md-4 text-md-end d-flex gap-2 justify-content-md-end">
+            <button onclick="runHistoricalWeather()" class="btn btn-glass btn-sm" id="histWeatherBtn">
+                <i data-lucide="refresh-cw" class="icon-sm"></i> Fetch History
+            </button>
+            <div class="btn-glass btn-sm d-flex align-items-center px-3">
+                <span class="small fw-bold text-primary">{{ logs|length }} Logs Recorded</span>
             </div>
+        </div>
+    </div>
 
-            <p class="text-muted">Historical weather data collected automatically when you visit the app.</p>
-            <div id="weatherLog" class="alert alert-light border d-none"
-                style="white-space: pre-wrap; font-size: 0.85rem;"></div>
+    <div id="weatherLog" class="glass-card border-primary d-none mb-4 animate-fade p-3">
+        <!-- Message will be injected here -->
+    </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>📅 Date</th>
-                            <th>🌡️ Max Temp</th>
-                            <th>🌧️ Rainfall</th>
-                            <th>📝 Conditions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in logs %}
-                        <tr>
-                            <td><strong>{{ log.date.strftime('%Y-%m-%d') }}</strong></td>
-                            <td>
-                                <span
-                                    class="badge {% if log.max_temp > 30 %}bg-danger{% elif log.max_temp < 15 %}bg-info{% else %}bg-success{% endif %}">
-                                    {{ "%.1f"|format(log.max_temp) }}°C
-                                </span>
-                            </td>
-                            <td>
-                                {% if log.rainfall > 0 %}
-                                <span class="badg bg-info text-dark">💧 {{ "%.1f"|format(log.rainfall) }} mm</span>
-                                {% else %}
-                                <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ log.description }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center py-4">
-                                <p class="text-muted mb-0">No weather history yet. Visit the home page to start logging!
-                                </p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="glass-card overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle mb-0">
+                        <thead class="bg-primary bg-opacity-5">
+                            <tr class="small text-uppercase fw-bold ls-1">
+                                <th class="ps-4 py-3">Date</th>
+                                <th class="text-center py-3">Max Temp</th>
+                                <th class="text-center py-3">Rainfall</th>
+                                <th class="py-3">Conditions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs|sort(attribute='date', reverse=True) %}
+                            <tr class="border-bottom border-light">
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ log.date.strftime('%d %b %Y') }}</div>
+                                    <div class="text-muted extra-small">{{ log.date.strftime('%A') }}</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3 py-1 {% if log.max_temp > 30 %}bg-danger{% elif log.max_temp < 15 %}bg-info{% else %}bg-success{% endif %} bg-opacity-10 text-{{ 'danger' if log.max_temp > 30 else ('info' if log.max_temp < 15 else 'success') }}">
+                                        {{ "%.1f"|format(log.max_temp) }}°C
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% if log.rainfall > 0 %}
+                                    <div class="text-primary fw-bold small d-flex align-items-center justify-content-center">
+                                        <i data-lucide="cloud-rain" class="icon-xs me-1"></i> {{ "%.1f"|format(log.rainfall) }} mm
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted extra-small d-flex align-items-center justify-content-center opacity-75">
+                                        <i data-lucide="sun" class="icon-xs me-1 text-warning"></i> Dry
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="text-capitalize small d-flex align-items-center">
+                                        <i data-lucide="info" class="icon-xs me-2 text-muted"></i>
+                                        {{ log.description }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="text-muted opacity-50">
+                                        <i data-lucide="cloud-sun" class="icon-xxl mb-3"></i>
+                                        <p class="mb-0">No weather history recorded yet.</p>
+                                        <button onclick="runHistoricalWeather()" class="btn btn-sm btn-link text-primary fw-bold mt-2">
+                                            Initialize Data
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-</div>
+
+<style>
+.ls-1 { letter-spacing: 1px; }
+.extra-small { font-size: 0.75rem; }
+.icon-xxl { width: 64px; height: 64px; }
+tr:last-child { border-bottom: none !important; }
+</style>
 
 <script>
     function runHistoricalWeather() {
         const btn = document.getElementById('histWeatherBtn');
         const logDiv = document.getElementById('weatherLog');
+        const originalText = btn.innerHTML;
+        
         btn.disabled = true;
-        btn.innerText = 'Running...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Syncing...';
         logDiv.classList.add('d-none');
 
         fetch('/api/add_historical_weather', { method: 'POST' })
             .then(r => r.json())
             .then(data => {
-                logDiv.innerText = data.log || data.message;
-                logDiv.classList.remove('d-none');
                 if (data.status === 'success') {
-                    alert('✅ Weather Data Added!');
-                    location.reload();
+                    logDiv.innerHTML = `<div class="d-flex align-items-center text-success"><i data-lucide="check-circle" class="icon-sm me-2"></i> ${data.message}</div>`;
+                    logDiv.classList.remove('d-none');
+                    if (window.lucide) lucide.createIcons();
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    alert('❌ Failed: ' + data.message);
+                    alert('❌ Sync failed: ' + data.message);
                 }
             })
             .catch(e => alert('Error: ' + e))
             .finally(() => {
                 btn.disabled = false;
-                btn.innerText = '🔄 Add Missing History';
+                btn.innerHTML = originalText;
+                if (window.lucide) lucide.createIcons();
             });
     }
 </script>
 {% endblock %}
+script>
+{% endblock %}

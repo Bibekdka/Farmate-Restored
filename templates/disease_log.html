@@ -1,132 +1,165 @@
 {% extends 'base.html' %}
 
+{% block title %}Disease Control - Farmate{% endblock %}
+
 {% block content %}
-<h2>🦠 Disease & Pest Log</h2>
-
-<div class="row">
-    <div class="col-md-5">
-        <div class="card p-4">
-            <h4>➕ Log Disease/Pest</h4>
-
-            <!-- AI Scan Button -->
-            <div class="mb-3 text-center">
-                <input type="file" id="diseaseImage" accept="image/*" capture="environment" class="d-none"
-                    onchange="analyzeDiseaseImage()">
-                <button type="button" class="btn btn-info text-white w-100"
-                    onclick="document.getElementById('diseaseImage').click()">
-                    📸 Scan Crop with AI
-                </button>
-                <div id="aiLoading" class="mt-2 text-primary fw-bold small d-none">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    Analyzing Image...
-                </div>
-            </div>
-            <form method="POST">
-                <div class="mb-3">
-                    <label>Date</label>
-                    <input type="date" id="diseaseDate" name="date" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Affected Crop</label>
-                    <select name="crop_id" class="form-select" required>
-                        <option value="">-- Select Crop --</option>
-                        {% for crop in crops %}
-                        <option value="{{ crop.id }}">{{ crop.crop_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Disease/Pest Name</label>
-                    <input type="text" name="disease_name" class="form-control" placeholder="e.g., Powdery Mildew"
-                        required>
-                </div>
-                <div class="mb-3">
-                    <label>Severity</label>
-                    <select name="severity" class="form-select">
-                        <option>Mild</option>
-                        <option>Moderate</option>
-                        <option>Severe</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Affected Area (%)</label>
-                    <input type="number" step="0.1" name="affected_area" class="form-control" placeholder="e.g., 25"
-                        required>
-                </div>
-                <div class="mb-3">
-                    <label>Treatment Applied</label>
-                    <textarea name="treatment" class="form-control" rows="2"
-                        placeholder="Describe treatment..."></textarea>
-                </div>
-                <div class="mb-3">
-                    <label>Notes</label>
-                    <textarea name="notes" class="form-control" rows="2"></textarea>
-                </div>
-                <button type="submit" class="btn btn-success w-100">Log Disease</button>
-            </form>
+<div class="animate-slide-up">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="text-gradient mb-1">Disease & Pest Control</h2>
+            <p class="text-muted">Early detection and intelligent treatment tracking for healthy yields.</p>
         </div>
     </div>
 
-    <div class="col-md-7">
-        <div class="card p-4">
-            <h4>📋 Disease Records</h4>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Date</th>
-                            <th>Crop</th>
-                            <th>Disease</th>
-                            <th>Severity</th>
-                            <th>Affected %</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for disease in diseases %}
-                        <tr>
-                            <td>{{ disease.date.strftime('%Y-%m-%d') }}</td>
-                            <td>
-                                {% set crop = crops|selectattr('id', 'equalto', disease.crop_id)|first %}
-                                {{ crop.crop_name if crop else 'Unknown' }}
-                            </td>
-                            <td>{{ disease.disease_name }}</td>
-                            <td>
-                                <span
-                                    class="badge {% if disease.severity == 'Severe' %}bg-danger{% elif disease.severity == 'Moderate' %}bg-warning{% else %}bg-info{% endif %}">
-                                    {{ disease.severity }}
-                                </span>
-                            </td>
-                            <td>{{ disease.affected_area }}%</td>
-                            <td>
-                                <form method="POST" action="{{ url_for('delete_disease', disease_id=disease.id) }}"
-                                    style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure?')">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="row g-4">
+        <!-- AI Diagnosis & Input -->
+        <div class="col-lg-5">
+            <!-- AI Scan Hero -->
+            <div class="glass-card mb-4 border-primary border-start border-4 bg-soft-primary">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="stat-icon-box bg-primary text-white mb-0" style="width: 60px; height: 60px; border-radius: 15px;">
+                        <i data-lucide="scan-eye" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-1">AI Crop Diagnostic</h4>
+                        <p class="text-muted small mb-3">Instant disease identification via image analysis.</p>
+                        <input type="file" id="diseaseImage" accept="image/*" capture="environment" class="d-none" onchange="analyzeDiseaseImage()">
+                        <button type="button" class="btn btn-primary-modern btn-sm d-flex align-items-center gap-2" onclick="document.getElementById('diseaseImage').click()">
+                            <i data-lucide="camera" style="width: 16px;"></i> Launch Scanner
+                        </button>
+                    </div>
+                </div>
+                <div id="aiLoading" class="mt-3 text-primary fw-bold small d-none text-center p-2 bg-white rounded-3 shadow-sm">
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Analyzing crop health patterns...
+                </div>
             </div>
 
-            <!-- Disease Details Expandable -->
-            {% for disease in diseases %}
-            <div class="alert alert-info mt-3" role="alert">
-                <strong>{{ disease.disease_name }}</strong> on
-                {% set crop = crops|selectattr('id', 'equalto', disease.crop_id)|first %}
-                {{ crop.crop_name if crop else 'Unknown' }} ({{ disease.date.strftime('%Y-%m-%d') }})
-                <p class="mb-0 mt-2"><strong>Treatment:</strong> {{ disease.treatment or 'Not specified' }}</p>
-                {% if disease.notes %}<p class="mb-0"><strong>Notes:</strong> {{ disease.notes }}</p>{% endif %}
+            <div class="glass-card">
+                <h4 class="mb-4">Log Incident</h4>
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">Detection Date</label>
+                            <input type="date" id="diseaseDate" name="date" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">Impacted Crop</label>
+                            <select name="crop_id" class="form-select" required>
+                                <option value="">-- Select Crop --</option>
+                                {% for crop in crops %}
+                                <option value="{{ crop.id }}">{{ crop.crop_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Disease/Pest Identity</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i data-lucide="bug" style="width: 16px;"></i></span>
+                            <input type="text" name="disease_name" class="form-control border-start-0" placeholder="e.g. Powdery Mildew" required>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">Severity</label>
+                            <select name="severity" class="form-select">
+                                <option>Mild</option>
+                                <option>Moderate</option>
+                                <option>Severe</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">Area Affected (%)</label>
+                            <input type="number" step="0.1" name="affected_area" class="form-control" placeholder="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Treatment Strategy</label>
+                        <textarea name="treatment" class="form-control" rows="2" placeholder="Describe measures taken..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">Field Observations</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Additional details..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary-modern w-100 py-3">Submit Incident Report</button>
+                </form>
             </div>
-            {% endfor %}
+        </div>
+
+        <!-- Records -->
+        <div class="col-lg-7">
+            <div class="glass-card h-100">
+                <h4 class="mb-4">Incident Registry</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr class="text-muted small text-uppercase">
+                                <th>Date</th>
+                                <th>Incident</th>
+                                <th>Impact</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disease in diseases|sort(attribute='date', reverse=True) %}
+                            <tr>
+                                <td class="text-muted small">{{ disease.date.strftime('%d %b') }}</td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ disease.disease_name }}</div>
+                                    {% set crop = crops|selectattr('id', 'equalto', disease.crop_id)|first %}
+                                    <small class="text-muted">{{ crop.crop_name if crop else 'Unknown Crop' }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge {% if disease.severity == 'Severe' %}bg-danger{% elif disease.severity == 'Moderate' %}bg-warning{% else %}bg-info{% endif %} rounded-pill px-2 py-1">
+                                        {{ disease.severity }}
+                                    </span>
+                                    <div class="small text-muted mt-1">{{ disease.affected_area }}% affected</div>
+                                </td>
+                                <td class="text-end">
+                                    <form method="POST" action="{{ url_for('delete_disease', disease_id=disease.id) }}">
+                                        <button type="submit" class="btn btn-light btn-sm text-danger border shadow-sm" onclick="return confirm('Archive this record?')">
+                                            <i data-lucide="trash-2" style="width: 14px;"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">No health incidents recorded.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Expanded View for recent items -->
+                <div class="mt-4">
+                    <h5 class="small fw-bold text-muted text-uppercase mb-3">Detailed Insight</h5>
+                    {% for disease in diseases|sort(attribute='date', reverse=True) %}
+                    {% if loop.index <= 2 %}
+                    <div class="p-3 bg-light rounded-4 mb-2 border-0">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="fw-bold text-dark">{{ disease.disease_name }}</span>
+                            <span class="small text-muted">{{ disease.date.strftime('%d %b %Y') }}</span>
+                        </div>
+                        <p class="small text-muted mb-1"><strong>Protocol:</strong> {{ disease.treatment or 'Manual inspection scheduled.' }}</p>
+                        {% if disease.notes %}
+                        <p class="small text-muted mb-0 italic">"{{ disease.notes }}"</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     document.getElementById('diseaseDate').valueAsDate = new Date();
+    lucide.createIcons();
 
     function analyzeDiseaseImage() {
         const fileInput = document.getElementById('diseaseImage');
@@ -143,39 +176,43 @@
             method: 'POST',
             body: formData
         })
-            .then(response => response.json())
-            .then(data => {
-                loading.classList.add('d-none');
-                if (data.status === 'success') {
-                    const result = data.data;
+        .then(response => response.json())
+        .then(data => {
+            loading.classList.add('d-none');
+            if (data.status === 'success') {
+                const result = data.data;
 
-                    // Populate Form Fields
-                    document.querySelector('[name="disease_name"]').value = result.disease_name || "Unknown";
-                    document.querySelector('[name="treatment"]').value = result.treatment || "";
-                    document.querySelector('[name="affected_area"]').value = 10; // Default guess
+                document.querySelector('[name="disease_name"]').value = result.disease_name || "Detected Issue";
+                document.querySelector('[name="treatment"]').value = result.treatment || "";
+                document.querySelector('[name="affected_area"]').value = 5; 
 
-                    const notesField = document.querySelector('[name="notes"]');
-                    notesField.value = `🤖 AI Diagnosis: ${result.disease_name}. Severity: ${result.severity}.`;
+                const notesField = document.querySelector('[name="notes"]');
+                notesField.value = `AI Insights: ${result.disease_name} identified. Recommended severity: ${result.severity}.`;
 
-                    // Try to match severity
-                    const severitySelect = document.querySelector('[name="severity"]');
-                    const aiSev = (result.severity || "").toLowerCase();
-                    for (let i = 0; i < severitySelect.options.length; i++) {
-                        if (severitySelect.options[i].text.toLowerCase().includes(aiSev)) {
-                            severitySelect.selectedIndex = i;
-                            break;
-                        }
+                const severitySelect = document.querySelector('[name="severity"]');
+                const aiSev = (result.severity || "").toLowerCase();
+                for (let i = 0; i < severitySelect.options.length; i++) {
+                    if (severitySelect.options[i].text.toLowerCase().includes(aiSev)) {
+                        severitySelect.selectedIndex = i;
+                        break;
                     }
-
-                    alert("✅ AI Analysis Complete! Please review the details.");
-                } else {
-                    alert("❌ AI Error: " + data.message);
                 }
-            })
-            .catch(error => {
-                loading.classList.add('d-none');
-                alert("❌ Connection Error: " + error);
-            });
+                
+                lucide.createIcons();
+                alert("✨ AI Scan Successful! Results populated below.");
+            } else {
+                alert("AI Scan failed: " + data.message);
+            }
+        })
+        .catch(error => {
+            loading.classList.add('d-none');
+            alert("Connection error: " + error);
+        });
     }
 </script>
-{% endblock %}
+
+<style>
+    .bg-soft-primary { background: #eff6ff; }
+    .bg-soft-accent { background: #fffbeb; }
+</style>
+{% endblock %}

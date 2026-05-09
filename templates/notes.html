@@ -1,58 +1,93 @@
 {% extends 'base.html' %}
 
+{% block title %}Farmer's Notebook - Farmate{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="card p-4 mb-4">
-            <h4>📝 Farmer's Notebook</h4>
-            <form method="POST">
-                <div class="mb-3">
-                    <textarea name="content" class="form-control" rows="3"
-                        placeholder="Write observation, crop health, reminders..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Save Note</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    {% for note in notes %}
-    <div class="col-md-4">
-        <div class="card p-3 mb-3 position-relative" style="background-color: #fff3cd;">
-            <div class="position-absolute top-0 end-0 p-2">
-                <button class="btn btn-sm btn-outline-dark border-0" data-bs-toggle="modal"
-                    data-bs-target="#editNoteModal{{ note.id }}">✏️</button>
-                <form action="{{ url_for('delete_note', note_id=note.id) }}" method="POST" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"
-                        onclick="return confirm('Delete this note?')">🗑️</button>
-                </form>
-            </div>
-            <p class="mt-3">{{ note.content }}</p>
-            <small class="text-muted">{{ note.created_at.strftime('%Y-%m-%d') }}</small>
-        </div>
-    </div>
-
-    <!-- Edit Modal for this note -->
-    <div class="modal fade" id="editNoteModal{{ note.id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Note</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ url_for('edit_note', note_id=note.id) }}" method="POST">
-                    <div class="modal-body">
-                        <textarea name="content" class="form-control" rows="4" required>{{ note.content }}</textarea>
+<div class="animate-slide-up">
+    <!-- Header & Entry Area -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2 class="text-gradient mb-3">Farmer's Notebook</h2>
+            <div class="glass-card p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Capture Observations</label>
+                        <textarea name="content" class="form-control glass-panel fs-5" rows="3"
+                            placeholder="Soil moisture looks good, turmeric sprouting in block B..." required></textarea>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="small text-muted mb-0"><i data-lucide="info" class="icon-xs me-1"></i> Notes are automatically dated</p>
+                        <button type="submit" class="btn btn-primary px-4 py-2 d-flex align-items-center">
+                            <i data-lucide="sticky-note" class="icon-sm me-2"></i> Save Observation
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    {% endfor %}
+
+    <!-- Notes Grid -->
+    <div class="row g-4">
+        {% for note in notes %}
+        <div class="col-md-4">
+            <div class="glass-card p-4 position-relative h-100 transition-all hover-up" style="background: rgba(255, 243, 205, 0.4); border: 1px solid rgba(255, 193, 7, 0.2);">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="text-muted small d-flex align-items-center">
+                        <i data-lucide="calendar" class="icon-xs me-1"></i>
+                        {{ note.created_at.strftime('%d %b, %Y') }}
+                    </div>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-icon btn-sm text-primary" data-bs-toggle="modal"
+                            data-bs-target="#editNoteModal{{ note.id }}" title="Edit">
+                            <i data-lucide="edit-3" class="icon-xs"></i>
+                        </button>
+                        <form action="{{ url_for('delete_note', note_id=note.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-icon btn-sm text-danger"
+                                onclick="return confirm('Delete this note?')" title="Delete">
+                                <i data-lucide="trash-2" class="icon-xs"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <p class="fs-6 text-dark opacity-90 mb-0" style="white-space: pre-wrap;">{{ note.content }}</p>
+            </div>
+        </div>
+
+        <!-- Premium Edit Modal -->
+        <div class="modal fade" id="editNoteModal{{ note.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content glass-card p-0 border-0 overflow-hidden">
+                    <div class="modal-header px-4 pt-4 border-0">
+                        <h5 class="modal-title fw-bold">Update Observation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ url_for('edit_note', note_id=note.id) }}" method="POST">
+                        <div class="modal-body px-4 pb-4">
+                            <textarea name="content" class="form-control glass-panel fs-6" rows="6" required>{{ note.content }}</textarea>
+                        </div>
+                        <div class="modal-footer px-4 pb-4 border-0 pt-0">
+                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4">Update Note</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-{% endblock %}
+
+<style>
+.hover-up:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 243, 205, 0.6) !important;
+}
+.btn-icon:hover {
+    background: rgba(0,0,0,0.05);
+}
+</style>
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}
