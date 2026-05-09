@@ -1,7 +1,11 @@
 import os
-from app import app, db
+from app import create_app, db
 
-# Ensure tables are created in production (Render)
+# Create the application instance
+app = create_app()
+
+# Ensure tables are created in production environments (like Render)
+# FUTURE EDITING: For larger databases, use 'flask db upgrade' instead of 'create_all'.
 with app.app_context():
     db.create_all()
 

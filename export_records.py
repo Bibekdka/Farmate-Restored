@@ -3,7 +3,9 @@ import datetime
 import pandas as pd
 from sqlalchemy import func
 
-from app import app, db, FarmRecord, WeatherLog
+from app import app
+from extensions import db
+from models import FarmRecord, WeatherLog
 
 
 def export_records(output_dir='exports'):
