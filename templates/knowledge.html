@@ -113,36 +113,56 @@
 
 {% block content %}
 <div class="animate-slide-up" style="padding-top: 2rem;">
-    <div class="row mb-5">
-        <div class="col-md-12 text-center">
-            <h1 class="text-gradient display-4 fw-bold mb-3">Knowledge Hub</h1>
-            <p class="text-muted fs-5 mx-auto" style="max-width: 600px;">Empowering Assam's farmers with data-driven insights and advanced decision support systems.</p>
-            <div style="height: 4px; width: 80px; background: var(--accent-orange); margin: 20px auto; border-radius: 2px;"></div>
+    <!-- Modern Header -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-lg-8 offset-lg-2 text-center">
+            <div class="stat-card-modern stat-card-contrast mb-4 mx-auto" style="max-width: 800px; padding: 3rem;">
+                <span class="badge bg-primary-light text-primary-dark fw-bold mb-3 px-3 py-2 rounded-pill">AGRICULTURAL INTELLIGENCE</span>
+                <h1 class="display-3 fw-bold mb-3" style="font-family: var(--font-heading);">Knowledge Hub</h1>
+                <p class="fs-5 opacity-80 mx-auto" style="max-width: 600px;">Empowering Assam's farmers with data-driven insights and advanced decision support systems from AAU FPE Protocols.</p>
+                <div class="d-flex justify-content-center gap-4 mt-4">
+                    <div class="text-center">
+                        <h4 class="mb-0 fw-bold">6+</h4>
+                        <small class="opacity-60">Smart Tools</small>
+                    </div>
+                    <div class="vr opacity-20"></div>
+                    <div class="text-center">
+                        <h4 class="mb-0 fw-bold">100%</h4>
+                        <small class="opacity-60">Local Data</small>
+                    </div>
+                    <div class="vr opacity-20"></div>
+                    <div class="text-center">
+                        <h4 class="mb-0 fw-bold">PRO</h4>
+                        <small class="opacity-60">Advisor</small>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="row">
         <!-- Navigation Vertical Sidebar -->
         <div class="col-md-3 mb-4">
-            <div class="glass-card p-3 sticky-top" style="top: 20px;">
+            <div class="glass-card p-3 sticky-top" style="top: 20px; border-radius: var(--radius-xl);">
+                <h6 class="text-muted small fw-bold px-4 mb-3 tracking-widest text-uppercase">Navigation</h6>
                 <div class="list-group list-group-flush border-0">
-                    <a href="#fertilizer" class="list-group-item list-group-item-action active glass-panel border-0 px-4 py-3 d-flex align-items-center gap-3" data-bs-toggle="list">
-                        <i data-lucide="test-tube-2" class="icon-sm"></i> <span>Fertilizer Calc</span>
+                    <a href="#fertilizer" class="nav-link active py-3" data-bs-toggle="list">
+                        <i data-lucide="test-tube-2"></i> <span>Fertilizer Calc</span>
                     </a>
-                    <a href="#zecc" class="list-group-item list-group-item-action glass-panel border-0 px-4 py-3 d-flex align-items-center gap-3" data-bs-toggle="list">
-                        <i data-lucide="thermometer-snowflake" class="icon-sm"></i> <span>Cool Storage</span>
+                    <a href="#zecc" class="nav-link py-3" data-bs-toggle="list">
+                        <i data-lucide="thermometer-snowflake"></i> <span>Cool Storage</span>
                     </a>
-                    <a href="#compliance" class="list-group-item list-group-item-action glass-panel border-0 px-4 py-3 d-flex align-items-center gap-3" data-bs-toggle="list">
-                        <i data-lucide="scroll-text" class="icon-sm"></i> <span>Turmeric Hub</span>
+                    <a href="#compliance" class="nav-link py-3" data-bs-toggle="list">
+                        <i data-lucide="scroll-text"></i> <span>Turmeric Hub</span>
                     </a>
-                    <a href="#pest_warning" class="list-group-item list-group-item-action glass-panel border-0 px-4 py-3 d-flex align-items-center gap-3" data-bs-toggle="list">
-                        <i data-lucide="alert-triangle" class="icon-sm"></i> <span>Pest Warning</span>
+                    <a href="#pest_warning" class="nav-link py-3" data-bs-toggle="list">
+                        <i data-lucide="alert-triangle"></i> <span>Pest Warning</span>
                     </a>
-                    <a href="#pest_calendar" class="list-group-item list-group-item-action glass-panel border-0 px-4 py-3 d-flex align-items-center gap-3" data-bs-toggle="list">
-                        <i data-lucide="calendar-days" class="icon-sm"></i> <span>Pest Calendar</span>
+                    <a href="#pest_calendar" class="nav-link py-3" data-bs-toggle="list">
+                        <i data-lucide="calendar-days"></i> <span>Pest Calendar</span>
                     </a>
-                    <a href="#crop_calendar" class="list-group-item list-group-item-action glass-panel border-0 px-4 py-3 d-flex align-items-center gap-3" data-bs-toggle="list">
-                        <i data-lucide="sprout" class="icon-sm"></i> <span>Crop Calendar</span>
+                    <a href="#crop_calendar" class="nav-link py-3" data-bs-toggle="list">
+                        <i data-lucide="sprout"></i> <span>Crop Calendar</span>
                     </a>
                 </div>
             </div>
@@ -152,80 +172,62 @@
     <div class="col-md-9">
         <div class="tab-content">
 
-            <!-- 1. Fertilizer Calculator -->
+            <!-- 1. Fertilizer Optimizer -->
             <div class="tab-pane fade show active" id="fertilizer">
-                <div class="glass-card p-4 p-md-5">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="stat-icon-box bg-success text-white shadow-sm" style="width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center;">
-                            <i data-lucide="calculator" size="32"></i>
-                        </div>
+                <div class="glass-card mb-4" style="border-left: 5px solid var(--primary);">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h3 class="fw-bold mb-1">Rice Fertilizer Optimizer</h3>
-                            <p class="text-muted mb-0">Assam Agriculture University FPE Protocols</p>
+                            <h2 class="fw-bold mb-1">Fertilizer Optimizer</h2>
+                            <p class="text-muted small mb-0">Precision nutrient management based on target yield (AAU FPE Protocols)</p>
+                        </div>
+                        <div class="stat-icon-box bg-primary-light text-primary">
+                            <i data-lucide="test-tube-2"></i>
                         </div>
                     </div>
 
-                    <form id="fertForm" class="row g-4">
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-dark">Target Yield (Quintal/Ha)</label>
-                            <input type="number" id="targetYield" class="form-control glass-panel border-0 px-3 py-2" placeholder="e.g. 40" required>
+                            <div class="p-4 bg-light rounded-4 border border-white">
+                                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                    <i data-lucide="settings-2" class="text-primary icon-sm"></i> Parameters
+                                </h6>
+                                <form id="fertForm" class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold">Target Yield (q/ha)</label>
+                                        <input type="number" class="form-control glass-input" id="targetYield" placeholder="e.g. 50" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold">Organic Manure (Ton/ha)</label>
+                                        <input type="number" class="form-control glass-input" id="organicManure" placeholder="e.g. 2" value="0">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold">Soil N</label>
+                                        <input type="number" class="form-control glass-input" id="soilN" placeholder="N" required>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold">Soil P</label>
+                                        <input type="number" class="form-control glass-input" id="soilP" placeholder="P" required>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold">Soil K</label>
+                                        <input type="number" class="form-control glass-input" id="soilK" placeholder="K" required>
+                                    </div>
+                                    <div class="col-12 mt-4">
+                                        <button type="button" onclick="calculateFertilizer()" class="btn btn-primary w-100 py-3 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                                            <i data-lucide="calculator"></i> Calculate Dosage
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-dark">Organic Manure (Ton/Ha)</label>
-                            <input type="number" id="organicManure" class="form-control glass-panel border-0 px-3 py-2" placeholder="e.g. 2" value="0">
-                        </div>
-                        
-                        <div class="col-12 mt-5">
-                            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
-                                <i data-lucide="flask-conical" class="icon-sm text-primary"></i>
-                                Soil Test Values (Kg/Ha)
-                            </h5>
-                            <div class="underline" style="margin: 0; width: 40px; height: 3px;"></div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-muted">Nitrogen (N)</label>
-                            <input type="number" id="soilN" class="form-control glass-panel border-0 px-3 py-2" placeholder="N value" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-muted">Phosphorus (P)</label>
-                            <input type="number" id="soilP" class="form-control glass-panel border-0 px-3 py-2" placeholder="P value" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-muted">Potassium (K)</label>
-                            <input type="number" id="soilK" class="form-control glass-panel border-0 px-3 py-2" placeholder="K value" required>
-                        </div>
-
-                        <div class="col-12 mt-5">
-                            <button type="button" class="btn btn-pill btn-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2" onclick="calculateFertilizer()">
-                                <i data-lucide="zap" class="icon-sm"></i> Calculate Optimal Dosage
-                            </button>
-                        </div>
-                    </form>
-
-                    <div id="fertResult" class="mt-5 d-none animate-slide-up">
-                        <div class="glass-panel p-4 border-primary border-opacity-25" style="border-radius: 20px; background: rgba(46, 125, 50, 0.05);">
-                            <h5 class="fw-bold mb-4 d-flex align-items-center gap-2 text-primary">
-                                <i data-lucide="check-circle" class="icon-sm"></i> Recommended Dosage
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <div class="glass-card bg-white p-3 text-center shadow-sm">
-                                        <p class="small text-muted mb-1">Urea</p>
-                                        <h3 class="fw-bold text-dark mb-0"><span id="resUrea">0</span> <small class="fs-6">kg</small></h3>
-                                    </div>
+                            <div id="fertResult" class="h-100 p-4 rounded-4 d-flex flex-column justify-content-center text-center border-dashed border-2" style="background: rgba(var(--primary-rgb), 0.03);">
+                                <div class="opacity-40 mb-3">
+                                    <i data-lucide="flask-conical" style="width: 48px; height: 48px;" class="text-primary"></i>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="glass-card bg-white p-3 text-center shadow-sm">
-                                        <p class="small text-muted mb-1">SSP</p>
-                                        <h3 class="fw-bold text-dark mb-0"><span id="resSSP">0</span> <small class="fs-6">kg</small></h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="glass-card bg-white p-3 text-center shadow-sm">
-                                        <p class="small text-muted mb-1">MOP</p>
-                                        <h3 class="fw-bold text-dark mb-0"><span id="resMOP">0</span> <small class="fs-6">kg</small></h3>
-                                    </div>
+                                <div id="fertResultContent">
+                                    <h5 class="fw-bold text-muted">Awaiting Input</h5>
+                                    <p class="small text-muted mb-0">Enter yield and soil parameters to see recommended dosage</p>
                                 </div>
                             </div>
                         </div>
@@ -233,311 +235,250 @@
                 </div>
             </div>
 
-            <!-- 1.5 ZECC Storage Builder -->
+            <!-- 2. ZECC Storage Builder -->
             <div class="tab-pane fade" id="zecc">
-                <div class="glass-card p-4 p-md-5">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="stat-icon-box bg-info text-white shadow-sm" style="width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center;">
-                            <i data-lucide="thermometer-snowflake" size="32"></i>
-                        </div>
+                <div class="glass-card mb-4" style="border-left: 5px solid var(--secondary);">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h3 class="fw-bold mb-1">Zero Energy Cool Chamber</h3>
-                            <p class="text-muted mb-0">Extended shelf life without electricity (Pusa Model)</p>
+                            <h2 class="fw-bold mb-1">Zero Energy Cool Chamber</h2>
+                            <p class="text-muted small mb-0">Extended shelf life without electricity (Pusa Model)</p>
+                        </div>
+                        <div class="stat-icon-box bg-secondary-light text-secondary">
+                            <i data-lucide="thermometer-snowflake"></i>
                         </div>
                     </div>
 
-                    <div class="row g-4 mb-5">
-                        <div class="col-md-6">
-                            <div class="feature-box h-100">
-                                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2 text-info">
-                                    <i data-lucide="info" class="icon-xs"></i>
-                                    Why build this?
-                                </h6>
-                                <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
-                                    <li class="small d-flex gap-2">
-                                        <i data-lucide="check" class="icon-xs text-success"></i>
-                                        Maintains 10-15°C lower than outside
-                                    </li>
-                                    <li class="small d-flex gap-2">
-                                        <i data-lucide="check" class="icon-xs text-success"></i>
-                                        Keeps humidity above 90%
-                                    </li>
-                                    <li class="small d-flex gap-2">
-                                        <i data-lucide="check" class="icon-xs text-success"></i>
-                                        Cost-effective & zero maintenance
-                                    </li>
-                                </ul>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 text-center border">
+                                <h6 class="text-muted small mb-1">Temp Reduction</h6>
+                                <h4 class="fw-bold text-secondary mb-0">-15°C</h4>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="feature-box h-100" style="border-left-color: var(--accent-orange);">
-                                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2 text-warning">
-                                    <i data-lucide="package" class="icon-xs"></i>
-                                    Required Materials
-                                </h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="badge bg-light text-dark border p-2">400 Bricks</span>
-                                    <span class="badge bg-light text-dark border p-2">Sand (Fine)</span>
-                                    <span class="badge bg-light text-dark border p-2">Bamboo Mat</span>
-                                    <span class="badge bg-light text-dark border p-2">Water Tank</span>
-                                </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 text-center border">
+                                <h6 class="text-muted small mb-1">Humidity</h6>
+                                <h4 class="fw-bold text-secondary mb-0">>90%</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 text-center border">
+                                <h6 class="text-muted small mb-1">Maintenance</h6>
+                                <h4 class="fw-bold text-secondary mb-0">Zero</h4>
                             </div>
                         </div>
                     </div>
 
-                    <div class="timeline-steps mt-4">
-                        <h4 class="fw-bold mb-4">Construction Guide</h4>
-                        <div class="glass-panel p-4">
-                            <div class="d-flex gap-4 mb-4">
-                                <div class="step-num bg-primary text-white shadow-sm">1</div>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Foundational Floor</h6>
-                                    <p class="small text-muted mb-0">Prepare a raised platform of 165cm x 115cm using a single layer of bricks.</p>
-                                </div>
+                    <div class="timeline-steps">
+                        <div class="d-flex gap-4 mb-4">
+                            <div class="step-num bg-secondary text-white shadow-sm">1</div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Floor Prep</h6>
+                                <p class="small text-muted mb-0">Prepare a 165cm x 115cm platform using a single layer of bricks.</p>
                             </div>
-                            <div class="d-flex gap-4 mb-4">
-                                <div class="step-num bg-primary text-white shadow-sm">2</div>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Double Wall Setup</h6>
-                                    <p class="small text-muted mb-0">Erect double walls up to 67.5cm height, leaving a 7.5cm gap between them.</p>
-                                </div>
+                        </div>
+                        <div class="d-flex gap-4 mb-4">
+                            <div class="step-num bg-secondary text-white shadow-sm">2</div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Double Wall</h6>
+                                <p class="small text-muted mb-0">Build double walls up to 67.5cm height with a 7.5cm gap.</p>
                             </div>
-                            <div class="d-flex gap-4">
-                                <div class="step-num bg-primary text-white shadow-sm">3</div>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Insulation Fill</h6>
-                                    <p class="small text-muted mb-0">Fill the 7.5cm gap with fine river sand and keep it constantly saturated with water.</p>
-                                </div>
+                        </div>
+                        <div class="d-flex gap-4">
+                            <div class="step-num bg-secondary text-white shadow-sm">3</div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Insulation</h6>
+                                <p class="small text-muted mb-0">Fill the gap with fine river sand and keep it saturated with water.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- 2. Turmeric Intelligence Hub -->
+            <!-- 3. Turmeric Intelligence Hub -->
             <div class="tab-pane fade" id="compliance">
-                <div class="glass-card p-4 p-md-5">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="stat-icon-box bg-warning text-dark shadow-sm" style="width: 50px; height: 50px; border-radius: 14px;">
+                <div class="glass-card mb-4" style="border-left: 5px solid var(--accent);">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1">Turmeric Intelligence</h2>
+                            <p class="text-muted small mb-0">Processing & Profitability Tools for Lakhadong & Local Varieties</p>
+                        </div>
+                        <div class="stat-icon-box bg-warning-light text-warning">
                             <i data-lucide="sun"></i>
                         </div>
-                        <div>
-                            <h4 class="fw-bold mb-0">Turmeric Intelligence Hub</h4>
-                            <p class="text-muted small mb-0">Specialized tools for high-value export crops</p>
-                        </div>
                     </div>
 
-                    <ul class="nav nav-pills glass-panel p-2 mb-4 gap-2 border-0" id="turmTab" role="tablist" style="border-radius: 16px;">
+                    <ul class="nav nav-tabs border-0 gap-2 mb-4" role="tablist">
                         <li class="nav-item">
-                            <button class="nav-link active rounded-3 d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#yield-tab">
-                                <i data-lucide="trending-up" class="icon-xs"></i> Yield Converter
-                            </button>
+                            <button class="nav-link active rounded-pill px-4 py-2 border-0 bg-light" data-bs-toggle="tab" data-bs-target="#yield-tab">Yield</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link rounded-3 d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#profit-tab">
-                                <i data-lucide="indian-rupee" class="icon-xs"></i> Profit Predictor
-                            </button>
+                            <button class="nav-link rounded-pill px-4 py-2 border-0 bg-light" data-bs-toggle="tab" data-bs-target="#profit-tab">Profit</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link rounded-3 d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#seed-tab">
-                                <i data-lucide="sprout" class="icon-xs"></i> Planting Calc
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link rounded-3 d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#check-tab">
-                                <i data-lucide="clipboard-check" class="icon-xs"></i> Compliance
-                            </button>
+                            <button class="nav-link rounded-pill px-4 py-2 border-0 bg-light" data-bs-toggle="tab" data-bs-target="#seed-tab">Planting</button>
                         </li>
                     </ul>
 
-                    <div class="tab-content pt-2">
-                        <!-- 2.1 Yield Converter -->
+                    <div class="tab-content">
+                        <!-- Yield Converter -->
                         <div class="tab-pane fade show active" id="yield-tab">
-                            <div class="glass-panel p-4">
-                                <h6 class="fw-bold mb-4">Fresh-to-Cured Recovery Calculator</h6>
-                                <div class="row g-4">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Select Variety</label>
-                                        <select id="turmVar" class="form-select glass-panel border-0 px-3 py-2" onchange="runTurmCalc()">
-                                            {% for t in turmeric_db.turmeric_varieties %}
-                                            <option value="{{ t.recovery_rate }}">{{ t.name }} (Curcumin: {{ t.curcumin_pct }}%)</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Fresh Raw Harvest (Kg)</label>
-                                        <input type="number" id="fQty" class="form-control glass-panel border-0 px-3 py-2" placeholder="1000" onkeyup="runTurmCalc()">
-                                    </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Select Variety</label>
+                                    <select id="turmVar" class="form-select glass-input" onchange="runTurmCalc()">
+                                        {% for t in turmeric_db.turmeric_varieties %}
+                                        <option value="{{ t.recovery_rate }}">{{ t.name }} ({{ t.curcumin_pct }}% Curcumin)</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                                
-                                <div class="mt-5 glass-card bg-primary bg-opacity-10 border-0 p-4">
-                                    <div class="row text-center g-3">
-                                        <div class="col-6 border-end border-white border-opacity-20">
-                                            <p class="small text-muted mb-1">Traditional Dry Yield</p>
-                                            <h3 id="tradY" class="fw-bold mb-0">0 <small class="fs-6 text-muted">kg</small></h3>
-                                        </div>
-                                        <div class="col-6">
-                                            <p class="small text-primary fw-bold mb-1">CFTRI Novel Method (+10%)</p>
-                                            <h3 id="novelY" class="fw-bold text-primary mb-0">0 <small class="fs-6 opacity-50">kg</small></h3>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Raw Harvest (Kg)</label>
+                                    <input type="number" id="fQty" class="form-control glass-input" placeholder="1000" onkeyup="runTurmCalc()">
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <div class="p-4 bg-primary bg-opacity-5 rounded-4 border-dashed border-primary border-opacity-20 text-center">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">Dry Yield (Trad.)</small>
+                                                <h3 class="fw-bold mb-0"><span id="tradY">0</span> <small class="fs-6">kg</small></h3>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-primary d-block">Novel Method (+10%)</small>
+                                                <h3 class="fw-bold text-primary mb-0"><span id="novelY">0</span> <small class="fs-6">kg</small></h3>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 2.2 Profit Predictor -->
+                        <!-- Profit Predictor -->
                         <div class="tab-pane fade" id="profit-tab">
-                            <div class="glass-panel p-4">
-                                <h6 class="fw-bold mb-4">Processing Profitability Estimator</h6>
-                                <div class="row g-3 mb-4">
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-bold">Raw Qty (Quintals)</label>
-                                        <input type="number" id="pQty" class="form-control glass-panel border-0" onkeyup="runTurmProfit()">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-bold">Raw Price (₹/Q)</label>
-                                        <input type="number" id="rPrice" class="form-control glass-panel border-0" value="3000" onkeyup="runTurmProfit()">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-bold">Powder Price (₹/Q)</label>
-                                        <input type="number" id="dPrice" class="form-control glass-panel border-0" value="18000" onkeyup="runTurmProfit()">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Raw Qty (Qtl)</label>
+                                    <input type="number" id="pQty" class="form-control glass-input" onkeyup="runTurmProfit()">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Raw Price (₹/Q)</label>
+                                    <input type="number" id="rPrice" class="form-control glass-input" value="3000" onkeyup="runTurmProfit()">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Market Price (₹/Q)</label>
+                                    <input type="number" id="dPrice" class="form-control glass-input" value="18000" onkeyup="runTurmProfit()">
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <div class="row g-3 text-center">
+                                        <div class="col-md-4">
+                                            <div class="p-3 bg-light rounded-3">
+                                                <small class="text-muted d-block">Investment</small>
+                                                <h5 id="tInv" class="fw-bold mb-0">₹0</h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="p-3 bg-primary text-white rounded-3 shadow">
+                                                <small class="opacity-80 d-block">Net Profit</small>
+                                                <h5 id="nProf" class="fw-bold mb-0">₹0</h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="p-3 bg-light rounded-3">
+                                                <small class="text-muted d-block">B:C Ratio</small>
+                                                <h5 id="bcr" class="fw-bold mb-0">0:0</h5>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <div class="glass-card bg-white p-3 shadow-sm border-0">
-                                            <p class="small text-muted mb-1">Total Cost</p>
-                                            <h5 id="tInv" class="fw-bold text-danger mb-0">₹ 0</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="glass-card bg-white p-3 shadow-sm border-0">
-                                            <p class="small text-muted mb-1">B:C Ratio</p>
-                                            <h5 id="bcr" class="fw-bold text-primary mb-0">1 : 0.0</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="glass-card bg-primary text-white p-3 shadow-sm border-0">
-                                            <p class="small opacity-80 mb-1">Net Profit</p>
-                                            <h5 id="nProf" class="fw-bold mb-0">₹ 0</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-center small text-muted mt-3 mb-0">Based on std processing cost of ₹3,480/Q and 20% recovery.</p>
                             </div>
-                                               <!-- 2.3 Planting Calculator -->
+                        </div>
+
+                        <!-- Planting Calc -->
                         <div class="tab-pane fade" id="seed-tab">
-                            <div class="glass-panel p-4">
-                                <h6 class="fw-bold mb-4">Seed Rate & Planting Geometry</h6>
-                                <div class="row align-items-center g-4">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Area to Plant</label>
-                                        <div class="input-group">
-                                            <input type="number" id="plantArea" class="form-control glass-panel border-0 px-3" placeholder="1" onkeyup="calcSeed()">
-                                            <span class="input-group-text glass-panel border-0 bg-primary text-white">Hectares (ha)</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="glass-card bg-primary bg-opacity-10 border-0 p-3 d-flex align-items-center gap-3">
-                                            <div class="stat-icon-box bg-white text-primary shadow-sm" style="width: 40px; height: 40px; border-radius: 10px;">
-                                                <i data-lucide="sprout" class="icon-sm"></i>
-                                            </div>
-                                            <div>
-                                                <p class="small text-muted mb-0">Total Seed Required</p>
-                                                <h5 class="fw-bold mb-0"><span id="seedReq">0</span> <small class="fs-6">kg</small></h5>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Area (Hectares)</label>
+                                    <input type="number" id="plantArea" class="form-control glass-input" placeholder="1" onkeyup="calcSeed()">
                                 </div>
-                                <div class="mt-4 glass-panel bg-light bg-opacity-50 border-0 p-3">
-                                    <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
-                                        <i data-lucide="info" class="icon-xs text-primary"></i>
-                                        Recommended Spacing (Assam Standard)
-                                    </h6>
-                                    <div class="row g-2">
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2 border-end border-white border-opacity-20">
-                                                <small class="text-muted d-block">Row to Row</small>
-                                                <span class="fw-bold">45 cm</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2 border-end border-white border-opacity-20">
-                                                <small class="text-muted d-block">Plant to Plant</small>
-                                                <span class="fw-bold">25 cm</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2 border-end border-white border-opacity-20">
-                                                <small class="text-muted d-block">Depth</small>
-                                                <span class="fw-bold">10 cm</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2">
-                                                <small class="text-muted d-block">Expected Yield</small>
-                                                <span class="fw-bold text-success">~32.5t /ha</span>
-                                            </div>
-                                        </div>
+                                <div class="col-md-6 text-center">
+                                    <div class="p-4 bg-primary-light bg-opacity-10 rounded-4 border-dashed">
+                                        <small class="text-primary fw-bold d-block mb-1">Seed Required</small>
+                                        <h2 class="fw-bold text-primary mb-0"><span id="seedReq">0</span> <small class="fs-5">kg</small></h2>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- 2.4 Compliance Checklist -->
-                        <div class="tab-pane fade" id="check-tab">
-                            <div class="glass-panel p-4">
-                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h6 class="fw-bold mb-0">US / EU Export Compliance Checklist</h6>
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-3 py-2">Critical Standards</span>
-                                </div>
-                                <div class="d-flex flex-column gap-3">
-                                    <label class="glass-card p-3 border-0 d-flex align-items-center gap-3 cursor-pointer hover-scale">
-                                        <input class="form-check-input mt-0" type="checkbox">
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-0 small">FDA Registration</h6>
-                                            <p class="text-muted small mb-0">Required for all food facilities exporting to USA</p>
-                                        </div>
-                                        <i data-lucide="shield-check" class="text-primary opacity-50"></i>
-                                    </label>
-                                    <label class="glass-card p-3 border-0 d-flex align-items-center gap-3 cursor-pointer hover-scale">
-                                        <input class="form-check-input mt-0" type="checkbox">
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-0 small">Phytosanitary Certificate</h6>
-                                            <p class="text-muted small mb-0">Official proof that produce is certified pest-free</p>
-                                        </div>
-                                        <i data-lucide="file-check" class="text-primary opacity-50"></i>
-                                    </label>
-                                    <label class="glass-card p-3 border-0 d-flex align-items-center gap-3 cursor-pointer hover-scale">
-                                        <input class="form-check-input mt-0" type="checkbox">
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-0 small">Lead Content Test (< 2.5 ppm)</h6>
-                                            <p class="text-muted small mb-0">Rigorous laboratory verification for heavy metals</p>
-                                        </div>
-                                        <i data-lucide="test-tube" class="text-primary opacity-50"></i>
-                                    </label>
-                                    <label class="glass-card p-3 border-0 d-flex align-items-center gap-3 cursor-pointer hover-scale">
-                                        <input class="form-check-input mt-0" type="checkbox">
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-0 small">Export Packaging Standards</h6>
-                                            <p class="text-muted small mb-0">Use thermoformed/corrugated plastic for hygiene</p>
-                                        </div>
-                                        <i data-lucide="package-check" class="text-primary opacity-50"></i>
-                                    </label>
-                                </div>
+            <!-- 4. Pest Warning System -->
+            <div class="tab-pane fade" id="pest_warning">
+                <div class="glass-card mb-4" style="border-left: 5px solid var(--danger);">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1">Pest Warning System</h2>
+                            <p class="text-muted small mb-0">Early warning based on weather ETL thresholds</p>
+                        </div>
+                        <div class="stat-icon-box bg-danger-light text-danger">
+                            <i data-lucide="alert-triangle"></i>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-light rounded-4 mb-4">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="spinner-grow text-danger spinner-grow-sm" role="status"></div>
+                            <h6 class="fw-bold mb-0">Live Analysis Status</h6>
+                        </div>
+                        <div id="pestWarningContent" class="row g-3">
+                            <div class="col-12 text-center py-4">
+                                <button onclick="checkPestWarning()" class="btn btn-outline-danger px-5 py-3 rounded-pill fw-bold">
+                                    <i data-lucide="scan-search"></i> Run ETL Assessment
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- 2.5 Processing Guide -->
-                        <div class="tab-pane fade" id="process-tab">
-                            <div class="glass-panel p-4">
-                                <h6 class="fw-bold mb-4">Post-Harvest Processing Guide</h6>
-                                <div class="row g-4">
-                                    <div class="col-md-6">
+            <!-- 5. Pest Calendar -->
+            <div class="tab-pane fade" id="pest_calendar">
+                <div class="glass-card mb-4">
+                    <h3 class="fw-bold mb-4 d-flex align-items-center gap-3">
+                        <i data-lucide="calendar-days" class="text-primary"></i> Seasonal Pest Matrix
+                    </h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 rounded-start">Pest Name</th>
+                                    <th class="border-0">Peak Season</th>
+                                    <th class="border-0">ETL Threshold</th>
+                                    <th class="border-0 rounded-end">Management</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in pest_etl.pests %}
+                                <tr>
+                                    <td class="fw-bold">{{ p.name }}</td>
+                                    <td><span class="badge bg-primary-light text-primary-dark rounded-pill">{{ p.peak_season }}</span></td>
+                                    <td class="small text-muted">{{ p.etl }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-light border" onclick="showPestManage('{{ p.name }}')">
+                                            <i data-lucide="eye" class="icon-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
                                         <div class="glass-card p-4 border-0 h-100">
                                             <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
                                                 <i data-lucide="flame" class="icon-xs text-danger"></i>
