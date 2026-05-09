@@ -592,7 +592,10 @@ def create_app(config_name=None):
     # FUTURE EDITING: Add more API endpoints for mobile app integration here.
 
     return app
-n app
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)
+
 
 # Main entry point
 app = create_app()
