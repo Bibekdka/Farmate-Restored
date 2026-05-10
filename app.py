@@ -393,20 +393,53 @@ def create_app(config_name=None):
 
     @app.route('/api/analyze_logs', methods=['POST'])
     def api_analyze_logs():
-        """Simulate AI analysis of the week's logs."""
+        """Use Gemini to analyze the week's logs for insights."""
         try:
-            # In a real app, this would use OpenAI/Gemini to summarize Note contents
-            notes = Note.query.order_by(Note.created_at.desc()).limit(5).all()
+            # Fetch recent logs
+            notes = Note.query.order_by(Note.created_at.desc()).limit(10).all()
             if not notes:
                 return jsonify({'status': 'info', 'message': 'Not enough logs to analyze. Write a few entries first!'})
             
-            analysis = "<strong>Week Summary:</strong> Your farm activities show consistent progress. "
-            analysis += "Recent entries mention harvest and weather observations. "
-            analysis += "<br><br><strong>Advice:</strong> Monitor rainfall trends as noted in your logs to optimize irrigation."
-            
-            return jsonify({'status': 'success', 'content': analysis})
+            # Use the actual AI service
+            result = ai_advisor.analyze_logs(notes)
+            return jsonify(result)
         except Exception as e:
-            return jsonify({'status': 'error', 'message': str(e)}), 500
+            logger.error(f"AI Analysis failed: {str(e)}")
+            return jsonify({'status': 'error', 'message': "AI Service unavailable. Check API Key."}), 500
+
+    @app.route('/ai_advisor')
+    def ai_advisor_page():
+        """Render the dedicated AI Advisor chat interface."""
+        return render_template('ai_advisor.html')
+
+    @app.route('/api/ai/chat', methods=['POST'])
+    def api_ai_chat():
+        """General purpose AI chat endpoint for the advisor."""
+        data = request.json
+        user_message = data.get('message', '')
+        
+        if not user_message:
+            return jsonify({'status': 'error', 'message': 'Empty message'})
+            
+        # Basic context: Farm current stats
+        total_income = db.session.query(func.sum(FarmRecord.amount)).filter(FarmRecord.category == 'Income').scalar() or 0
+        total_expense = db.session.query(func.sum(FarmRecord.amount)).filter(FarmRecord.category == 'Expense').scalar() or 0
+        
+        prompt = f"""
+        User Message: {user_message}
+        
+        Context:
+        - Current Total Income: ₹{total_income}
+        - Current Total Expenses: ₹{total_expense}
+        - Platform: Farmate Agriculture Admin
+        
+        Respond as a helpful Agronomist AI. If the user asks about crops, diseases, or financial advice, use the context. 
+        Keep responses professional, concise, and formatted with HTML tags if needed.
+        """
+        
+        payload = {"contents": [{"parts": [{"text": prompt}]}]}
+        result = ai_advisor._call_gemini(payload)
+        return jsonify(result)
 
     @app.route('/reports')
     def reports():
