@@ -8,9 +8,12 @@ def setup_logging(app):
     log_dir = Path('logs')
     log_dir.mkdir(exist_ok=True)
     
+    # Set level based on app config
+    level = logging.DEBUG if app.debug else logging.INFO
+    
     # Create logger
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(level)
     
     # File handler (all logs)
     file_handler = logging.handlers.RotatingFileHandler(

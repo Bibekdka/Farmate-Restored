@@ -449,7 +449,7 @@ def create_app(config_name=None):
             return jsonify(result)
         except Exception as e:
             logger.error(f"AI Analysis failed: {str(e)}")
-            return jsonify({'status': 'error', 'message': "AI Service unavailable. Check API Key."}), 500
+            return jsonify({'status': 'error', 'message': "AI Advisor is temporarily busy. Please try again."}), 503
 
     @app.route('/ai_advisor')
     def ai_advisor_page():
@@ -481,9 +481,13 @@ def create_app(config_name=None):
         Keep responses professional, concise, and formatted with HTML tags if needed.
         """
         
-        payload = {"contents": [{"parts": [{"text": prompt}]}]}
-        result = ai_advisor._call_gemini(payload)
-        return jsonify(result)
+        try:
+            payload = {"contents": [{"parts": [{"text": prompt}]}]}
+            result = ai_advisor._call_gemini(payload)
+            return jsonify(result)
+        except Exception as e:
+            logger.error(f"AI Chat failed: {str(e)}")
+            return jsonify({'status': 'error', 'message': 'AI Advisor connection timeout.'}), 503
 
     @app.route('/weather_history')
     def weather_history():
@@ -705,16 +709,19 @@ def create_app(config_name=None):
     # FUTURE EDITING: Add more API endpoints for mobile app integration here.
 
     return app
+
+# Main entry point for local development
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    
+    # In production, we use migrations. In dev, we can auto-create.
+    if os.environ.get('APP_ENV') != 'production':
+        with app.app_context():
+            db.create_all()
+    
+    # Launch app
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
 
-
-# Main entry point
+# For WSGI servers (Gunicorn/Render)
 app = create_app()
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    # MAINTENANCE: Debug mode should be False in production
-    app.run(debug=True)

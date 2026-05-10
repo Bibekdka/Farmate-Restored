@@ -8,8 +8,21 @@ from utils.constants import FARM_LATITUDE, FARM_LONGITUDE, WMO_CODES
 
 logger = logging.getLogger(__name__)
 
+# Simple in-memory cache for weather
+_weather_cache = {
+    'data': None,
+    'expiry': None
+}
+
 def get_weather_openmeteo():
-    """Fetch weather forecast from Open-Meteo API."""
+    """Fetch weather forecast from Open-Meteo API with 30-minute caching."""
+    global _weather_cache
+    
+    # Return cached data if still valid (30 minute cache)
+    now = datetime.datetime.now()
+    if _weather_cache['data'] and _weather_cache['expiry'] > now:
+        return _weather_cache['data']
+
     try:
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
@@ -37,11 +50,15 @@ def get_weather_openmeteo():
                     'rain_prob': daily['precipitation_sum'][i]
                 }
                 forecast.append(day_data)
+            
+            # Update cache on success
+            _weather_cache['data'] = forecast
+            _weather_cache['expiry'] = datetime.datetime.now() + datetime.timedelta(minutes=30)
         
         return forecast
     except Exception as e:
         logger.error(f"Weather Forecast Error: {e}")
-        return []
+        return _weather_cache['data'] or [] # Fallback to stale cache if available
 
 def fetch_historical_weather(start_date, end_date):
     """Fetch historical weather data from Open-Meteo Archive API."""
