@@ -1,0 +1,10 @@
+{
+  "timestamp": "20260510_095223",
+  "date": "2026-05-10",
+  "database_size_kb": 80.0,
+  "backups": {
+    "local": "backups\\farm_data_20260510_095223.db",
+    "desktop": "C:\\Users\\abhij\\Desktop\\FarmApp_Emergency_Backups\\2026-05-10\\farm_data_20260510_095223.db",
+    "onedrive": "C:\\Users\\abhij\\OneDrive\\FarmApp_Backups\\2026-05-10\\farm_data_20260510_095223.db"
+  }
+}
