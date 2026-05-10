@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Ledger - Farmate{% endblock %}
+
+{% block content %}
+<div class="animate-slide-up">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="glass-card bg-gradient-primary text-white p-5 position-relative overflow-hidden border-0">
+                <div class="position-absolute top-0 end-0 p-5 opacity-10">
+                    <i data-lucide="book" style="width: 150px; height: 150px;"></i>
+                </div>
+                <div class="position-relative z-1">
+                    <h1 class="display-6 fw-bold mb-2">Financial Ledger</h1>
+                    <p class="fs-5 opacity-75 mb-0">Detailed history of all income and expenses for your farm.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Ledger Entry Form -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary me-3">
+                        <i data-lucide="plus" class="icon-sm"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">New Entry</h5>
+                </div>
+                <form action="/add_record" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Date</label>
+                            <input type="date" name="date" class="form-control glass-panel" id="transactionDate" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Activity Description</label>
+                        <input type="text" name="activity" class="form-control glass-panel" placeholder="e.g., Sold 50kg Tomatoes" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Type</label>
+                            <select name="category" class="form-select glass-panel" id="categorySelect" onchange="toggleExpenseType()">
+                                <option value="Expense">Expense</option>
+                                <option value="Income">Income</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text glass-panel border-end-0">₹</span>
+                                <input type="number" step="0.01" name="amount" class="form-control glass-panel" placeholder="0.00" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="expenseTypeDiv">
+                        <label class="form-label small fw-bold">Expense Category</label>
+                        <select name="expense_type" class="form-select glass-panel">
+                            <option value="">Choose category...</option>
+                            {% for opt in ['Fuel', 'Labour', 'Seed', 'Water', 'Transportation', 'Medicine', 'Misc'] %}
+                            <option value="{{ opt }}">{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Notes (Optional)</label>
+                        <textarea name="desc" class="form-control glass-panel" rows="3" placeholder="Additional details..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm fw-bold">
+                        <i data-lucide="save" class="icon-sm me-2"></i> Save Entry
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ledger Table -->
+        <div class="col-lg-8">
+            <div class="glass-card p-0 overflow-hidden h-100 d-flex flex-column">
+                <div class="px-4 py-3 bg-light bg-opacity-50 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Ledger History</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('download_export') }}?format=xlsx" class="btn btn-sm btn-light border fw-bold text-success">
+                            <i data-lucide="file-spreadsheet" class="icon-xs me-1"></i> Export Excel
+                        </a>
+                        <a href="{{ url_for('download_export') }}?format=pdf" class="btn btn-sm btn-light border fw-bold text-danger">
+                            <i data-lucide="file-text" class="icon-xs me-1"></i> Export PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="table-responsive flex-grow-1">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr class="small text-uppercase text-muted">
+                                <th class="px-4 py-3">Details</th>
+                                <th class="py-3">Category</th>
+                                <th class="py-3">Type</th>
+                                <th class="py-3">Amount</th>
+                                <th class="text-end px-4 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records|sort(attribute='date', reverse=True) %}
+                            <tr>
+                                <td class="px-4 py-3">
+                                    <div class="fw-bold">{{ record.activity_type }}</div>
+                                    <div class="small text-muted">{{ record.date.strftime('%d %b, %Y') }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill px-3 py-2 {% if record.category == 'Income' %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10 text-{{ 'success' if record.category == 'Income' else 'danger' }}">
+                                        {{ record.category }}
+                                    </span>
+                                </td>
+                                <td><span class="small text-muted">{{ record.expense_type if record.expense_type else '-' }}</span></td>
+                                <td class="fw-bold">₹{{ "%.2f"|format(record.amount) }}</td>
+                                <td class="text-end px-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
+                                            <i data-lucide="more-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li><a class="dropdown-item" href="{{ url_for('edit_record', record_id=record.id) }}"><i data-lucide="edit" class="icon-xs me-2"></i> Edit</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="POST" action="{{ url_for('delete_record', record_id=record.id) }}">
+                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this record?')">
+                                                        <i data-lucide="trash-2" class="icon-xs me-2"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleExpenseType() {
+        const category = document.getElementById('categorySelect').value;
+        const div = document.getElementById('expenseTypeDiv');
+        if (category === 'Expense') {
+            div.style.display = 'block';
+            div.classList.add('animate-slide-up');
+        } else {
+            div.style.display = 'none';
+        }
+    }
+    toggleExpenseType();
+
+    // Set default date for quick entry
+    const dateInput = document.getElementById('transactionDate');
+    if (dateInput) {
+        dateInput.valueAsDate = new Date();
+    }
+
+    lucide.createIcons();
+</script>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+}
+.btn-icon:hover {
+    background: rgba(0,0,0,0.05);
+}
+</style>
+{% endblock %}

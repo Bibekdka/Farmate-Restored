@@ -33,6 +33,9 @@
                 <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
                     <i data-lucide="layout-dashboard"></i> Dashboard
                 </a>
+                <a href="/ledger" class="nav-link {% if request.path == '/ledger' %}active{% endif %}">
+                    <i data-lucide="book"></i> Ledger
+                </a>
                 <a href="/calendar" class="nav-link {% if request.path == '/calendar' %}active{% endif %}">
                     <i data-lucide="calendar"></i> Calendar
                 </a>
@@ -83,11 +86,15 @@
         <nav class="mobile-nav">
             <a href="/dashboard" class="mobile-nav-item {% if request.path == '/dashboard' %}active{% endif %}">
                 <i data-lucide="layout-dashboard"></i>
-                <span>Home</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/ledger" class="mobile-nav-item {% if request.path == '/ledger' %}active{% endif %}">
+                <i data-lucide="book"></i>
+                <span>Ledger</span>
             </a>
             <a href="/calendar" class="mobile-nav-item {% if request.path == '/calendar' %}active{% endif %}">
                 <i data-lucide="calendar"></i>
-                <span>Events</span>
+                <span>Calendar</span>
             </a>
             <a href="/daily_log" class="mobile-nav-item {% if request.path == '/daily_log' %}active{% endif %}">
                 <i data-lucide="plus-circle" style="font-size: 32px; color: var(--primary);"></i>

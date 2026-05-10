@@ -19,9 +19,9 @@
         </div>
     </div>
 
-    <!-- Quick Entry & Stats -->
+    <!-- Stats & Graph -->
     <div class="row g-4 mb-5">
-        <div class="col-lg-8">
+        <div class="col-12">
             <div class="stats-grid mb-4">
                 <div class="stat-card-modern glass-card p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -67,139 +67,27 @@
                     <h5 class="fw-bold mb-0 d-flex align-items-center">
                         <i data-lucide="line-chart" class="icon-sm text-primary me-2"></i> Financial Analytics
                     </h5>
-                    <div class="dropdown">
-                        <button class="btn btn-sm glass-panel dropdown-toggle px-3" data-bs-toggle="dropdown">Last 7 Days</button>
-                        <ul class="dropdown-menu shadow border-0">
-                            <li><a class="dropdown-item active" href="#">Last 7 Days</a></li>
-                            <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
-                        </ul>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-none d-md-flex align-items-center gap-2 me-2" id="customDateRange" style="display: none !important;">
+                            <input type="date" id="chartStartDate" class="form-control form-control-sm glass-panel w-auto">
+                            <span class="text-muted small">to</span>
+                            <input type="date" id="chartEndDate" class="form-control form-control-sm glass-panel w-auto">
+                            <button class="btn btn-sm btn-primary" onclick="updateChartWithCustomRange()">Apply</button>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm glass-panel dropdown-toggle px-3" data-bs-toggle="dropdown" id="filterLabel">Last 30 Days</button>
+                            <ul class="dropdown-menu shadow border-0">
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="updateChartRange(7, 'Last 7 Days')">Last 7 Days</a></li>
+                                <li><a class="dropdown-item active" href="javascript:void(0)" onclick="updateChartRange(30, 'Last 30 Days')">Last 30 Days</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="updateChartRange(90, 'Last 90 Days')">Last 90 Days</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleCustomRange()">Custom Range</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <div style="height: 320px;">
+                <div style="height: 400px;">
                     <canvas id="profitChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Transaction Form -->
-        <div class="col-lg-4">
-            <div class="glass-card p-4 h-100">
-                <div class="d-flex align-items-center mb-4">
-                    <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary me-3">
-                        <i data-lucide="plus" class="icon-sm"></i>
-                    </div>
-                    <h5 class="fw-bold mb-0">New Transaction</h5>
-                </div>
-                <form action="/add_record" method="POST">
-                    <div class="row g-3 mb-3">
-                        <div class="col-12">
-                            <label class="form-label small fw-bold">Date</label>
-                            <input type="date" name="date" class="form-control glass-panel" id="transactionDate" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Activity Description</label>
-                        <input type="text" name="activity" class="form-control glass-panel" placeholder="e.g., Sold 50kg Tomatoes" required>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Type</label>
-                            <select name="category" class="form-select glass-panel" id="categorySelect" onchange="toggleExpenseType()">
-                                <option value="Expense">Expense</option>
-                                <option value="Income">Income</option>
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Amount</label>
-                            <div class="input-group">
-                                <span class="input-group-text glass-panel border-end-0">₹</span>
-                                <input type="number" step="0.01" name="amount" class="form-control glass-panel" placeholder="0.00" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3" id="expenseTypeDiv">
-                        <label class="form-label small fw-bold">Expense Category</label>
-                        <select name="expense_type" class="form-select glass-panel">
-                            <option value="">Choose category...</option>
-                            {% for opt in ['Fuel', 'Labour', 'Seed', 'Water', 'Transportation', 'Medicine', 'Misc'] %}
-                            <option value="{{ opt }}">{{ opt }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold">Notes (Optional)</label>
-                        <textarea name="desc" class="form-control glass-panel" rows="3" placeholder="Additional details..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm fw-bold">
-                        <i data-lucide="save" class="icon-sm me-2"></i> Save Record
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent History -->
-    <div class="row">
-        <div class="col-12">
-            <div class="glass-card p-0 overflow-hidden">
-                <div class="px-4 py-3 bg-light bg-opacity-50 border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0">Recent Transactions</h5>
-                    <div class="d-flex gap-2">
-                        <a href="{{ url_for('download_export') }}?format=xlsx" class="btn btn-sm btn-light border fw-bold text-success">
-                            <i data-lucide="file-spreadsheet" class="icon-xs me-1"></i> Export Excel
-                        </a>
-                        <a href="{{ url_for('download_export') }}?format=pdf" class="btn btn-sm btn-light border fw-bold text-danger">
-                            <i data-lucide="file-text" class="icon-xs me-1"></i> Export PDF
-                        </a>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr class="small text-uppercase text-muted">
-                                <th class="px-4 py-3">Details</th>
-                                <th class="py-3">Category</th>
-                                <th class="py-3">Type</th>
-                                <th class="py-3">Amount</th>
-                                <th class="text-end px-4 py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for record in records[:10]|sort(attribute='date', reverse=True) %}
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <div class="fw-bold">{{ record.activity_type }}</div>
-                                    <div class="small text-muted">{{ record.date.strftime('%d %b, %Y') }}</div>
-                                </td>
-                                <td>
-                                    <span class="badge rounded-pill px-3 py-2 {% if record.category == 'Income' %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10 text-{{ 'success' if record.category == 'Income' else 'danger' }}">
-                                        {{ record.category }}
-                                    </span>
-                                </td>
-                                <td><span class="small text-muted">{{ record.expense_type if record.expense_type else '-' }}</span></td>
-                                <td class="fw-bold">₹{{ "%.2f"|format(record.amount) }}</td>
-                                <td class="text-end px-4">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
-                                            <i data-lucide="more-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                            <li><a class="dropdown-item" href="{{ url_for('edit_record', record_id=record.id) }}"><i data-lucide="edit" class="icon-xs me-2"></i> Edit</a></li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <form method="POST" action="{{ url_for('delete_record', record_id=record.id) }}">
-                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this record?')">
-                                                        <i data-lucide="trash-2" class="icon-xs me-2"></i> Delete
-                                                    </button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
@@ -207,106 +95,138 @@
 </div>
 
 <script>
-    function toggleExpenseType() {
-        const category = document.getElementById('categorySelect').value;
-        const div = document.getElementById('expenseTypeDiv');
-        if (category === 'Expense') {
-            div.style.display = 'block';
-            div.classList.add('animate-slide-up');
-        } else {
-            div.style.display = 'none';
-        }
-    }
-    toggleExpenseType();
-
     // Premium Chart.js Configuration
     const ctx = document.getElementById('profitChart').getContext('2d');
     const isDark = document.body.getAttribute('data-theme') === 'dark';
     
-    fetch('/api/financial_data')
-        .then(res => res.json())
-        .then(data => {
-            const gradientIncome = ctx.createLinearGradient(0, 0, 0, 400);
-            gradientIncome.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
-            gradientIncome.addColorStop(1, 'rgba(16, 185, 129, 0)');
+    let myChart;
 
-            const gradientExpense = ctx.createLinearGradient(0, 0, 0, 400);
-            gradientExpense.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
-            gradientExpense.addColorStop(1, 'rgba(239, 68, 68, 0)');
+    function fetchAndRenderChart(url) {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                if (myChart) {
+                    myChart.destroy();
+                }
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.months,
-                    datasets: [{
-                        label: 'Income',
-                        data: data.income,
-                        borderColor: '#10b981',
-                        backgroundColor: gradientIncome,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#10b981',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }, {
-                        label: 'Expenses',
-                        data: data.expense,
-                        borderColor: '#ef4444',
-                        backgroundColor: gradientExpense,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#ef4444',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            align: 'end',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
+                const gradientIncome = ctx.createLinearGradient(0, 0, 0, 400);
+                gradientIncome.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+                gradientIncome.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+                const gradientExpense = ctx.createLinearGradient(0, 0, 0, 400);
+                gradientExpense.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
+                gradientExpense.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Income',
+                            data: data.income,
+                            borderColor: '#10b981',
+                            backgroundColor: gradientIncome,
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#10b981',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }, {
+                            label: 'Expenses',
+                            data: data.expense,
+                            borderColor: '#ef4444',
+                            backgroundColor: gradientExpense,
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#ef4444',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                align: 'end',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 13 },
+                                cornerRadius: 8,
+                                displayColors: true
                             }
                         },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 12,
-                            titleFont: { size: 13, weight: 'bold' },
-                            bodyFont: { size: 13 },
-                            cornerRadius: 8,
-                            displayColors: true
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', drawBorder: false },
-                            ticks: { font: { size: 11 }, padding: 10 }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 11 }, padding: 10 }
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', drawBorder: false },
+                                ticks: { font: { size: 11 }, padding: 10 }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: 11 }, padding: 10 }
+                            }
                         }
                     }
-                }
+                });
             });
-        });
+    }
 
-    // Set default date for quick transaction
-    const dateInput = document.getElementById('transactionDate');
-    if (dateInput) {
-        dateInput.valueAsDate = new Date();
+    // Initialize with last 30 days
+    fetchAndRenderChart('/api/financial_data');
+
+    function updateChartRange(days, label) {
+        document.getElementById('filterLabel').innerText = label;
+        document.getElementById('customDateRange').style.setProperty('display', 'none', 'important');
+        
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - days);
+        
+        const startStr = startDate.toISOString().split('T')[0];
+        const endStr = endDate.toISOString().split('T')[0];
+        
+        fetchAndRenderChart(`/api/financial_data?start_date=${startStr}&end_date=${endStr}`);
+        
+        // Update active class in dropdown
+        document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
+        if (event && event.target) event.target.classList.add('active');
+    }
+
+    function toggleCustomRange() {
+        const div = document.getElementById('customDateRange');
+        if (div.style.getPropertyValue('display') === 'none') {
+            div.style.setProperty('display', 'flex', 'important');
+        } else {
+            div.style.setProperty('display', 'none', 'important');
+        }
+    }
+
+    function updateChartWithCustomRange() {
+        const start = document.getElementById('chartStartDate').value;
+        const end = document.getElementById('chartEndDate').value;
+        
+        if (start && end) {
+            document.getElementById('filterLabel').innerText = 'Custom Range';
+            fetchAndRenderChart(`/api/financial_data?start_date=${start}&end_date=${end}`);
+        } else {
+            alert('Please select both start and end dates.');
+        }
     }
 
     lucide.createIcons();

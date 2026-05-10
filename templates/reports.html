@@ -62,10 +62,20 @@
                         <i data-lucide="bar-chart-3" class="text-primary me-2"></i>
                         <h4 class="mb-0">Income vs Expense Trend</h4>
                     </div>
-                    <select class="form-select form-select-sm glass-panel w-auto">
-                        <option>Last 6 Months</option>
-                        <option>Last Year</option>
-                    </select>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-none d-md-flex align-items-center gap-2 me-2" id="customDateRange" style="display: none !important;">
+                            <input type="date" id="chartStartDate" class="form-control form-control-sm glass-panel w-auto">
+                            <span class="text-muted small">to</span>
+                            <input type="date" id="chartEndDate" class="form-control form-control-sm glass-panel w-auto">
+                            <button class="btn btn-sm btn-primary" onclick="updateChartWithCustomRange()">Apply</button>
+                        </div>
+                        <select class="form-select form-select-sm glass-panel w-auto" id="rangeSelect" onchange="handleRangeChange()">
+                            <option value="30">Last 30 Days</option>
+                            <option value="180" selected>Last 6 Months</option>
+                            <option value="365">Last Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
                 </div>
                 <div style="height: 350px;">
                     <canvas id="incomeExpenseChart"></canvas>
@@ -92,124 +102,154 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Fetch real data from the API
-        fetch('/api/financial_data')
+    let trendChart;
+    let pieChart;
+
+    function fetchAndRender(url) {
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 renderCharts(data);
             })
             .catch(error => {
                 console.error('Error fetching chart data:', error);
-                // Fallback / Placeholder if API fails
-                renderCharts({
-                    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    income: [0, 0, 0, 0, 0, 0],
-                    expense: [0, 0, 0, 0, 0, 0],
-                    expense_labels: ['No Data'],
-                    expense_values: [1]
-                });
             });
+    }
 
-        function renderCharts(data) {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#a0a0a0' : '#666';
-            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+    // Initial load: Last 6 months
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const startStr = sixMonthsAgo.toISOString().split('T')[0];
+    const endStr = new Date().toISOString().split('T')[0];
+    fetchAndRender(`/api/financial_data?start_date=${startStr}&end_date=${endStr}`);
 
-            // 1. Income vs Expense Trend
-            const ctxBar = document.getElementById('incomeExpenseChart').getContext('2d');
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: data.months,
-                    datasets: [
-                        {
-                            label: 'Income',
-                            data: data.income,
-                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
-                            borderColor: '#22c55e',
-                            borderWidth: 1,
-                            borderRadius: 6,
-                            barThickness: 15
-                        },
-                        {
-                            label: 'Expense',
-                            data: data.expense,
-                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                            borderColor: '#ef4444',
-                            borderWidth: 1,
-                            borderRadius: 6,
-                            barThickness: 15
-                        }
-                    ]
+    function handleRangeChange() {
+        const val = document.getElementById('rangeSelect').value;
+        const customDiv = document.getElementById('customDateRange');
+        
+        if (val === 'custom') {
+            customDiv.style.setProperty('display', 'flex', 'important');
+        } else {
+            customDiv.style.setProperty('display', 'none', 'important');
+            const days = parseInt(val);
+            const start = new Date();
+            start.setDate(start.getDate() - days);
+            const sStr = start.toISOString().split('T')[0];
+            const eStr = new Date().toISOString().split('T')[0];
+            fetchAndRender(`/api/financial_data?start_date=${sStr}&end_date=${eStr}`);
+        }
+    }
+
+    function updateChartWithCustomRange() {
+        const start = document.getElementById('chartStartDate').value;
+        const end = document.getElementById('chartEndDate').value;
+        if (start && end) {
+            fetchAndRender(`/api/financial_data?start_date=${start}&end_date=${end}`);
+        }
+    }
+
+    function renderCharts(data) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#a0a0a0' : '#666';
+        const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+        if (trendChart) trendChart.destroy();
+        if (pieChart) pieChart.destroy();
+
+        // 1. Income vs Expense Trend
+        const ctxBar = document.getElementById('incomeExpenseChart').getContext('2d');
+        trendChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: data.income,
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        borderColor: '#22c55e',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barThickness: data.labels.length > 31 ? 5 : 15
+                    },
+                    {
+                        label: 'Expense',
+                        data: data.expense,
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: '#ef4444',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barThickness: data.labels.length > 31 ? 5 : 15
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        position: 'top', 
+                        labels: { 
+                            usePointStyle: true, 
+                            font: { family: 'Outfit', size: 12 },
+                            color: textColor
+                        } 
+                    }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { 
-                            position: 'top', 
-                            labels: { 
-                                usePointStyle: true, 
-                                font: { family: 'Outfit', size: 12 },
-                                color: textColor
-                            } 
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: { 
+                            font: { family: 'Outfit' },
+                            color: textColor,
+                            callback: value => '₹' + value.toLocaleString()
                         }
                     },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            grid: { color: gridColor },
-                            ticks: { 
-                                font: { family: 'Outfit' },
-                                color: textColor,
-                                callback: value => '₹' + value.toLocaleString()
-                            }
-                        },
-                        x: { 
-                            grid: { display: false },
-                            ticks: { 
-                                font: { family: 'Outfit' },
-                                color: textColor
-                            }
+                    x: { 
+                        grid: { display: false },
+                        ticks: { 
+                            font: { family: 'Outfit' },
+                            color: textColor
                         }
                     }
                 }
-            });
+            }
+        });
 
-            // 2. Expense Distribution (Doughnut)
-            const ctxPie = document.getElementById('expensePieChart').getContext('2d');
-            new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: data.expense_labels,
-                    datasets: [{
-                        data: data.expense_values,
-                        backgroundColor: [
-                            '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { 
-                                usePointStyle: true, 
-                                padding: 20, 
-                                font: { family: 'Outfit', size: 11 },
-                                color: textColor
-                            } 
-                        }
+        // 2. Expense Distribution (Doughnut)
+        const ctxPie = document.getElementById('expensePieChart').getContext('2d');
+        pieChart = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: data.expense_labels,
+                datasets: [{
+                    data: data.expense_values,
+                    backgroundColor: [
+                        '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { 
+                            usePointStyle: true, 
+                            padding: 20, 
+                            font: { family: 'Outfit', size: 11 },
+                            color: textColor
+                        } 
                     }
                 }
-            });
-        }
+            }
+        });
+    }
     });
 </script>
 {% endblock %}

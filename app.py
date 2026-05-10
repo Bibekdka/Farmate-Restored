@@ -124,14 +124,11 @@ def create_app(config_name=None):
 
     @app.route('/dashboard')
     def dashboard():
-        """Main financial dashboard with aggregation and transaction history."""
+        """Main financial dashboard with aggregation and visualization."""
         # OPTIMIZED: Use SQL Aggregation instead of fetching all records
         total_income = db.session.query(func.sum(FarmRecord.amount)).filter(FarmRecord.category == 'Income').scalar() or 0
         total_expense = db.session.query(func.sum(FarmRecord.amount)).filter(FarmRecord.category == 'Expense').scalar() or 0
         net_profit = total_income - total_expense
-        
-        # Transactions Table
-        records = FarmRecord.query.order_by(FarmRecord.date.desc()).all()
         
         # Expense breakdown by type
         expense_breakdown_query = db.session.query(
@@ -144,7 +141,13 @@ def create_app(config_name=None):
         expense_breakdown = {type_: amount for type_, amount in expense_breakdown_query}
         
         return render_template('dashboard.html', income=total_income, expense=total_expense, 
-                              profit=net_profit, records=records, expense_breakdown=expense_breakdown)
+                               profit=net_profit, expense_breakdown=expense_breakdown)
+
+    @app.route('/ledger')
+    def ledger():
+        """Dedicated page for viewing and managing financial ledger entries."""
+        records = FarmRecord.query.order_by(FarmRecord.date.desc()).all()
+        return render_template('ledger.html', records=records)
 
     @app.route('/add_record', methods=['POST'])
     def add_record():
@@ -648,50 +651,89 @@ def create_app(config_name=None):
 
     @app.route('/api/financial_data')
     def api_financial_data():
-        """Retrieve aggregated financial data for reporting charts."""
-        # Get last 6 months
-        end_date = datetime.date.today().replace(day=1) + relativedelta(months=1)
-        months = []
+        """Retrieve aggregated financial data for reporting charts with dynamic range support."""
+        start_date_str = request.args.get('start_date')
+        end_date_str = request.args.get('end_date')
+        
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+        else:
+            # Default to last 30 days if no range provided
+            end_date = datetime.date.today()
+            start_date = end_date - datetime.timedelta(days=30)
+
+        # Determine aggregation level
+        delta = end_date - start_date
+        
+        labels = []
         income_data = []
         expense_data = []
         
-        for i in range(5, -1, -1):
-            target_month = end_date - relativedelta(months=i+1)
-            months.append(target_month.strftime('%b %Y'))
-            
-            # Aggregate income for this month
-            inc = db.session.query(func.sum(FarmRecord.amount)).filter(
-                FarmRecord.category == 'Income',
-                FarmRecord.date >= target_month,
-                FarmRecord.date < target_month + relativedelta(months=1)
-            ).scalar() or 0
-            income_data.append(float(inc))
-            
-            # Aggregate expense for this month
-            exp = db.session.query(func.sum(FarmRecord.amount)).filter(
-                FarmRecord.category == 'Expense',
-                FarmRecord.date >= target_month,
-                FarmRecord.date < target_month + relativedelta(months=1)
-            ).scalar() or 0
-            expense_data.append(float(exp))
+        if delta.days <= 62: # Daily aggregation for up to ~2 months
+            current = start_date
+            while current <= end_date:
+                labels.append(current.strftime('%d %b'))
+                
+                inc = db.session.query(func.sum(FarmRecord.amount)).filter(
+                    FarmRecord.category == 'Income',
+                    FarmRecord.date == current
+                ).scalar() or 0
+                income_data.append(float(inc))
+                
+                exp = db.session.query(func.sum(FarmRecord.amount)).filter(
+                    FarmRecord.category == 'Expense',
+                    FarmRecord.date == current
+                ).scalar() or 0
+                expense_data.append(float(exp))
+                
+                current += datetime.timedelta(days=1)
+        else: # Monthly aggregation for longer ranges
+            # Adjust to start of month
+            curr_month = start_date.replace(day=1)
+            while curr_month <= end_date:
+                labels.append(curr_month.strftime('%b %Y'))
+                next_month = curr_month + relativedelta(months=1)
+                
+                inc = db.session.query(func.sum(FarmRecord.amount)).filter(
+                    FarmRecord.category == 'Income',
+                    FarmRecord.date >= curr_month,
+                    FarmRecord.date < next_month
+                ).scalar() or 0
+                income_data.append(float(inc))
+                
+                exp = db.session.query(func.sum(FarmRecord.amount)).filter(
+                    FarmRecord.category == 'Expense',
+                    FarmRecord.date >= curr_month,
+                    FarmRecord.date < next_month
+                ).scalar() or 0
+                expense_data.append(float(exp))
+                
+                curr_month = next_month
 
-        # Expense breakdown by type (all time)
+        # Expense breakdown by type for the selected period
         breakdown_query = db.session.query(
             FarmRecord.expense_type, func.sum(FarmRecord.amount)
         ).filter(
             FarmRecord.category == 'Expense',
-            FarmRecord.expense_type != None
+            FarmRecord.expense_type != None,
+            FarmRecord.date >= start_date,
+            FarmRecord.date <= end_date
         ).group_by(FarmRecord.expense_type).all()
         
-        labels = [row[0] for row in breakdown_query]
-        values = [float(row[1]) for row in breakdown_query]
+        breakdown_labels = [row[0] for row in breakdown_query]
+        breakdown_values = [float(row[1]) for row in breakdown_query]
         
         return jsonify({
-            'months': months,
+            'months': labels, # Keeping key 'months' for backward compatibility or renaming to 'labels'
+            'labels': labels,
             'income': income_data,
             'expense': expense_data,
-            'expense_labels': labels if labels else ['No Expenses'],
-            'expense_values': values if values else [0]
+            'expense_labels': breakdown_labels if breakdown_labels else ['No Expenses'],
+            'expense_values': breakdown_values if breakdown_values else [0]
         })
 
     @app.route('/api/backup_status')
