@@ -81,3 +81,24 @@ class WeatherLog(db.Model):
     rainfall = db.Column(db.Float)
     description = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=datetime.datetime.now)
+
+class Inventory(db.Model):
+    """Tracks supplies like seeds, fertilizers, and pesticides."""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(50), nullable=False) # Seed, Fertilizer, Pesticide, Tool, etc.
+    quantity = db.Column(db.Float, default=0.0)
+    unit = db.Column(db.String(20)) # kg, Liters, Bags, Packets
+    min_stock_level = db.Column(db.Float, default=0.0)
+    last_updated = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    notes = db.Column(db.String(200))
+
+class InventoryTransaction(db.Model):
+    """Tracks every time stock is added or used."""
+    id = db.Column(db.Integer, primary_key=True)
+    inventory_id = db.Column(db.Integer, db.ForeignKey('inventory.id'), nullable=False)
+    date = db.Column(db.Date, default=datetime.date.today)
+    transaction_type = db.Column(db.String(20)) # Purchase, Usage, Waste, Correction
+    quantity = db.Column(db.Float, nullable=False)
+    notes = db.Column(db.String(200))
+    inventory = db.relationship('Inventory', backref='transactions')

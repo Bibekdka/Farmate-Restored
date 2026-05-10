@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from extensions import db, migrate, csrf
 from models import (
     FarmRecord, Note, Crop, Yield, DiseaseLog, 
-    PestLog, Reminder, WeatherLog
+    PestLog, Reminder, WeatherLog, Inventory, InventoryTransaction
 )
 from config import config
 from ai_service import ai_advisor
@@ -283,6 +283,101 @@ def create_app(config_name=None):
         crops_list = Crop.query.all()
         diseases = DiseaseLog.query.order_by(DiseaseLog.date.desc()).all()
         return render_template('disease_log.html', crops=crops_list, diseases=diseases)
+
+    @app.route('/inventory', methods=['GET', 'POST'])
+    def inventory():
+        """View and manage farm inventory (seeds, fertilizer, etc.)."""
+        if request.method == 'POST':
+            try:
+                name = validate_string(request.form.get('name'), min_len=2)
+                category = request.form.get('category')
+                quantity = float(request.form.get('quantity', 0))
+                unit = request.form.get('unit')
+                min_stock = float(request.form.get('min_stock', 0))
+                notes = request.form.get('notes')
+
+                item = Inventory(
+                    name=name,
+                    category=category,
+                    quantity=quantity,
+                    unit=unit,
+                    min_stock_level=min_stock,
+                    notes=notes
+                )
+                db.session.add(item)
+                
+                # Create initial transaction
+                db.session.flush() # Get ID
+                transaction = InventoryTransaction(
+                    inventory_id=item.id,
+                    transaction_type='Purchase',
+                    quantity=quantity,
+                    notes="Initial stock"
+                )
+                db.session.add(transaction)
+                db.session.commit()
+                logger.info(f"Inventory item added: {name}")
+            except Exception as e:
+                logger.error(f"Error adding inventory: {e}")
+                db.session.rollback()
+            return redirect(url_for('inventory'))
+            
+        items = Inventory.query.all()
+        return render_template('inventory.html', items=items)
+
+    @app.route('/inventory/update/<int:item_id>', methods=['POST'])
+    def update_inventory(item_id):
+        """Update inventory levels (add/use stock) and trigger alerts."""
+        item = Inventory.query.get_or_404(item_id)
+        try:
+            trans_type = request.form.get('type') # Purchase or Usage
+            change_qty = float(request.form.get('quantity', 0))
+            
+            if trans_type == 'Usage':
+                item.quantity -= change_qty
+            else:
+                item.quantity += change_qty
+                
+            transaction = InventoryTransaction(
+                inventory_id=item.id,
+                transaction_type=trans_type,
+                quantity=change_qty,
+                notes=request.form.get('notes')
+            )
+            db.session.add(transaction)
+            
+            # CHECK FOR LOW STOCK ALERT
+            if item.quantity <= item.min_stock_level:
+                # Check if a reminder already exists for this item
+                existing_reminder = Reminder.query.filter_by(
+                    title=f"Low Stock: {item.name}",
+                    completed=False
+                ).first()
+                
+                if not existing_reminder:
+                    new_reminder = Reminder(
+                        date=datetime.date.today(),
+                        task_type='Misc',
+                        title=f"Low Stock: {item.name}",
+                        description=f"Current quantity ({item.quantity} {item.unit}) is below minimum level ({item.min_stock_level} {item.unit}). Please restock.",
+                        priority='High'
+                    )
+                    db.session.add(new_reminder)
+                    logger.warning(f"Low stock alert created for {item.name}")
+            
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error updating inventory: {e}")
+            db.session.rollback()
+            
+        return redirect(url_for('inventory'))
+
+    @app.route('/inventory/history/<int:item_id>')
+    def inventory_history(item_id):
+        """View history of transactions for a specific inventory item."""
+        item = Inventory.query.get_or_404(item_id)
+        transactions = InventoryTransaction.query.filter_by(inventory_id=item_id).order_by(InventoryTransaction.date.desc()).all()
+        return render_template('inventory_history.html', item=item, transactions=transactions)
 
     @app.route('/calendar')
     @app.route('/calendar/<int:year>/<int:month>')

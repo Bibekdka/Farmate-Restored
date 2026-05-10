@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('inventory') }}" class="btn btn-outline-secondary btn-sm mb-2">
+            <i class="fas fa-arrow-left"></i> Back to Inventory
+        </a>
+        <h1 class="h2">📜 Transaction History: {{ item.name }}</h1>
+        <p class="text-muted">Current Stock: <strong>{{ item.quantity }} {{ item.unit }}</strong> | Category: {{ item.category }}</p>
+    </div>
+
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Change</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trans in transactions %}
+                    <tr>
+                        <td>{{ trans.date.strftime('%d %b %Y') }}</td>
+                        <td>
+                            {% if trans.transaction_type == 'Purchase' %}
+                                <span class="badge bg-success">PURCHASE</span>
+                            {% elif trans.transaction_type == 'Usage' %}
+                                <span class="badge bg-warning text-dark">USAGE</span>
+                            {% elif trans.transaction_type == 'Waste' %}
+                                <span class="badge bg-danger">WASTE</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ trans.transaction_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="{% if trans.transaction_type == 'Purchase' %}text-success{% elif trans.transaction_type in ['Usage', 'Waste'] %}text-danger{% endif %} fw-bold">
+                            {% if trans.transaction_type == 'Purchase' %}+{% elif trans.transaction_type in ['Usage', 'Waste'] %}-{% endif %}
+                            {{ trans.quantity }} {{ item.unit }}
+                        </td>
+                        <td>{{ trans.notes or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not transactions %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">No history found for this item.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
