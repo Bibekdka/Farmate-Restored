@@ -76,14 +76,20 @@ def create_app(config_name=None):
     @app.route('/')
     def home():
         """Home/dashboard page with weather and recent activities."""
-        backfill_weather_history()
-        weather_data = get_weather_openmeteo()
+        weather_data = None
+        try:
+            # Try to get weather, but don't crash the whole app if it fails
+            backfill_weather_history()
+            weather_data = get_weather_openmeteo()
+        except Exception as e:
+            logger.error(f"Weather service failed on home route: {e}")
+            # weather_data remains None, template handles it
         
         # Auto-archive today's weather
         if weather_data:
             today = datetime.date.today()
-            if not WeatherLog.query.filter_by(date=today).first():
-                try:
+            try:
+                if not WeatherLog.query.filter_by(date=today).first():
                     todays_weather = weather_data[0]
                     new_log = WeatherLog(
                         date=today,
@@ -93,13 +99,23 @@ def create_app(config_name=None):
                     )
                     db.session.add(new_log)
                     db.session.commit()
-                except Exception as e:
-                    logger.error(f"Failed to archive weather: {e}")
-                    db.session.rollback()
+            except Exception as e:
+                logger.error(f"Failed to archive weather: {e}")
+                db.session.rollback()
         
-        recent_activities = FarmRecord.query.order_by(FarmRecord.date.desc()).limit(5).all()
+        try:
+            recent_activities = FarmRecord.query.order_by(FarmRecord.date.desc()).limit(5).all()
+        except Exception as e:
+            logger.error(f"Database query failed on home route: {e}")
+            recent_activities = []
+
         today_reminders = Reminder.query.filter_by(date=datetime.date.today(), completed=False).all()
         return render_template('index.html', weather=weather_data, activities=recent_activities, reminders=today_reminders)
+
+    @app.route('/health')
+    def health_check():
+        """Basic health check to verify the app is running."""
+        return jsonify({'status': 'healthy', 'timestamp': datetime.datetime.now().isoformat()}), 200
 
     @app.route('/dashboard')
     def dashboard():
