@@ -223,81 +223,85 @@
     const ctx = document.getElementById('profitChart').getContext('2d');
     const isDark = document.body.getAttribute('data-theme') === 'dark';
     
-    const gradientIncome = ctx.createLinearGradient(0, 0, 0, 400);
-    gradientIncome.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
-    gradientIncome.addColorStop(1, 'rgba(16, 185, 129, 0)');
+    fetch('/api/financial_data')
+        .then(res => res.json())
+        .then(data => {
+            const gradientIncome = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientIncome.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+            gradientIncome.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-    const gradientExpense = ctx.createLinearGradient(0, 0, 0, 400);
-    gradientExpense.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
-    gradientExpense.addColorStop(1, 'rgba(239, 68, 68, 0)');
+            const gradientExpense = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientExpense.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
+            gradientExpense.addColorStop(1, 'rgba(239, 68, 68, 0)');
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [{
-                label: 'Income',
-                data: [450, 680, 520, 890, 1100, 950, 1400],
-                borderColor: '#10b981',
-                backgroundColor: gradientIncome,
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: '#10b981',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }, {
-                label: 'Expenses',
-                data: [320, 410, 460, 390, 520, 610, 430],
-                borderColor: '#ef4444',
-                backgroundColor: gradientExpense,
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: '#ef4444',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    align: 'end',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20,
-                        font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.months,
+                    datasets: [{
+                        label: 'Income',
+                        data: data.income,
+                        borderColor: '#10b981',
+                        backgroundColor: gradientIncome,
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#10b981',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }, {
+                        label: 'Expenses',
+                        data: data.expense,
+                        borderColor: '#ef4444',
+                        backgroundColor: gradientExpense,
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#ef4444',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            padding: 12,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', drawBorder: false },
+                            ticks: { font: { size: 11 }, padding: 10 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11 }, padding: 10 }
+                        }
                     }
-                },
-                tooltip: {
-                    backgroundColor: '#1e293b',
-                    padding: 12,
-                    titleFont: { size: 13, weight: 'bold' },
-                    bodyFont: { size: 13 },
-                    cornerRadius: 8,
-                    displayColors: true
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', drawBorder: false },
-                    ticks: { font: { size: 11 }, padding: 10 }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 11 }, padding: 10 }
-                }
-            }
-        }
-    });
+            });
+        });
 
     // Set default date for quick transaction
     const dateInput = document.getElementById('transactionDate');

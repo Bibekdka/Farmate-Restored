@@ -44,25 +44,35 @@
                 </div>
                 
                 <div class="d-flex align-items-baseline mb-4">
-                    <h2 class="display-3 fw-bold mb-0">32°</h2>
+                    {% if weather %}
+                    <h2 class="display-3 fw-bold mb-0">{{ weather[0].temp|round|int }}°</h2>
+                    {% else %}
+                    <h2 class="display-3 fw-bold mb-0">--°</h2>
+                    {% endif %}
                     <span class="fs-4 ms-2 opacity-75">C</span>
                 </div>
                 
-                <h5 class="fw-bold mb-4">Partly Cloudy • High Humidity</h5>
+                <h5 class="fw-bold mb-4">
+                    {% if weather %}
+                    {{ weather[0].desc }}
+                    {% else %}
+                    Weather Data Unavailable
+                    {% endif %}
+                </h5>
                 
                 <div class="glass-panel p-3 bg-white bg-opacity-10 border-0 mb-4">
                     <div class="row text-center">
                         <div class="col-4 border-end border-white border-opacity-20">
                             <p class="small opacity-75 mb-1">Humidity</p>
-                            <div class="fw-bold">65%</div>
+                            <div class="fw-bold">{% if weather %}--{% else %}--{% endif %}%</div>
                         </div>
                         <div class="col-4 border-end border-white border-opacity-20">
                             <p class="small opacity-75 mb-1">Wind</p>
-                            <div class="fw-bold">12 km/h</div>
+                            <div class="fw-bold">{% if weather %}--{% else %}--{% endif %} km/h</div>
                         </div>
                         <div class="col-4">
                             <p class="small opacity-75 mb-1">Rain Chance</p>
-                            <div class="fw-bold">5%</div>
+                            <div class="fw-bold">{% if weather %}{{ weather[0].rain_prob }} mm{% else %}--{% endif %}</div>
                         </div>
                     </div>
                 </div>
@@ -132,6 +142,39 @@
     </div>
 </div>
 
+<!-- Analytics & Trends Section -->
+<div class="row g-4 mt-2 mb-5 animate-slide-up" style="animation-delay: 0.2s;">
+    <!-- Financial Trends Chart -->
+    <div class="col-lg-6">
+        <div class="glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0 d-flex align-items-center">
+                    <i data-lucide="line-chart" class="icon-sm text-primary me-2"></i> Financial Insights
+                </h5>
+                <a href="/dashboard" class="btn btn-sm glass-panel small text-primary fw-bold">View Ledger</a>
+            </div>
+            <div style="height: 300px;">
+                <canvas id="financialTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Trends Chart -->
+    <div class="col-lg-6">
+        <div class="glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0 d-flex align-items-center">
+                    <i data-lucide="cloud-sun" class="icon-sm text-info me-2"></i> Weather History
+                </h5>
+                <a href="/weather_history" class="btn btn-sm glass-panel small text-info fw-bold">Detailed Trends</a>
+            </div>
+            <div style="height: 300px;">
+                <canvas id="weatherTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .bg-gradient-primary {
     background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
@@ -153,6 +196,94 @@
 </style>
 
 <script>
+    // Initialize Real-time Charts
+    function initCharts() {
+        // 1. Financial Chart
+        fetch('/api/financial_data')
+            .then(res => res.json())
+            .then(data => {
+                const ctx = document.getElementById('financialTrendChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.months,
+                        datasets: [
+                            {
+                                label: 'Income',
+                                data: data.income,
+                                backgroundColor: '#10b981',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Expense',
+                                data: data.expense,
+                                backgroundColor: '#ef4444',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top', align: 'end' } },
+                        scales: { y: { beginAtZero: true, grid: { drawBorder: false, color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+                    }
+                });
+            });
+
+        // 2. Weather Trend Chart
+        fetch('/api/weather_data')
+            .then(res => res.json())
+            .then(data => {
+                const ctx = document.getElementById('weatherTrendChart').getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+                gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [
+                            {
+                                label: 'Max Temp (°C)',
+                                data: data.temps,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'transparent',
+                                tension: 0.4,
+                                borderWidth: 3,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Rainfall (mm)',
+                                data: data.rainfall,
+                                borderColor: '#3b82f6',
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.4,
+                                borderWidth: 2,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        scales: {
+                            y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Temp (°C)' } },
+                            y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Rain (mm)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            });
+    }
+
+    initCharts();
+</script>
+
+<script>
     function updateDashboard() {
         const now = new Date();
         const hours = now.getHours();
@@ -171,7 +302,4 @@
     updateDashboard();
     lucide.createIcons();
 </script>
-{% endblock %}
-}
-</style>
 {% endblock %}

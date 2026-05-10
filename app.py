@@ -270,7 +270,7 @@ def create_app(config_name=None):
         import calendar
         from datetime import date as dt_date
         
-        today = datetime.now()
+        today = datetime.datetime.now()
         if year is None or month is None:
             year = today.year
             month = today.month
@@ -291,11 +291,11 @@ def create_app(config_name=None):
         month_name = calendar.month_name[month]
 
         # Fetch events for the month
-        start_date = datetime(year, month, 1)
+        start_date = datetime.datetime(year, month, 1)
         if month == 12:
-            end_date = datetime(year + 1, 1, 1)
+            end_date = datetime.datetime(year + 1, 1, 1)
         else:
-            end_date = datetime(year, month + 1, 1)
+            end_date = datetime.datetime(year, month + 1, 1)
 
         records = FarmRecord.query.filter(FarmRecord.date >= start_date, FarmRecord.date < end_date).all()
         reminders = Reminder.query.filter(Reminder.date >= start_date, Reminder.date < end_date).all()
@@ -401,7 +401,7 @@ def create_app(config_name=None):
         if content:
             new_note = Note(content=content)
             if date_str:
-                new_note.created_at = datetime.strptime(date_str, '%Y-%m-%d')
+                new_note.created_at = datetime.datetime.strptime(date_str, '%Y-%m-%d')
             db.session.add(new_note)
             db.session.commit()
         return redirect(url_for('daily_log'))
@@ -468,7 +468,7 @@ def create_app(config_name=None):
     def weather_history():
         """View detailed historical weather records."""
         history = WeatherLog.query.order_by(WeatherLog.date.desc()).all()
-        return render_template('weather_history.html', history=history)
+        return render_template('weather_history.html', logs=history)
 
     @app.route('/knowledge')
     def knowledge():
@@ -518,26 +518,11 @@ def create_app(config_name=None):
 
     @app.route('/api/add_historical_weather', methods=['POST'])
     def add_historical_weather():
-        """Fetch weather for the last 7 days if missing."""
+        """Fetch weather for the last 30 days if missing using service."""
         try:
-            # Simple implementation that logs current weather for missing days
-            # In a real app, this would call an API like OpenWeather
-            today = datetime.now()
-            added = 0
-            for i in range(1, 8):
-                check_date = (today - timedelta(days=i)).date()
-                existing = WeatherLog.query.filter_by(date=check_date).first()
-                if not existing:
-                    new_log = WeatherLog(
-                        date=check_date,
-                        max_temp=25.0 + (i % 3),
-                        rainfall=0.0 if i % 2 == 0 else 5.0,
-                        description="Partly Cloudy (Auto-recovered)"
-                    )
-                    db.session.add(new_log)
-                    added += 1
-            db.session.commit()
-            return jsonify({'status': 'success', 'message': f'Recovered {added} days of weather data.'})
+            from services.weather_service import backfill_weather_history
+            backfill_weather_history()
+            return jsonify({'status': 'success', 'message': 'Historical weather data sync completed successfully.'})
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -601,6 +586,18 @@ def create_app(config_name=None):
             last_backup_time = datetime.datetime.fromtimestamp(os.path.getmtime(backups[0]))
             return jsonify({'last_backup': last_backup_time.isoformat()})
         return jsonify({'last_backup': None})
+
+    @app.route('/api/weather_data')
+    def api_weather_data():
+        """Retrieve historical weather data for trends chart."""
+        last_30_days = datetime.date.today() - datetime.timedelta(days=30)
+        logs = WeatherLog.query.filter(WeatherLog.date >= last_30_days).order_by(WeatherLog.date.asc()).all()
+        
+        return jsonify({
+            'dates': [log.date.strftime('%d %b') for log in logs],
+            'temps': [log.max_temp for log in logs],
+            'rainfall': [log.rainfall for log in logs]
+        })
 
     @app.route('/quick_note', methods=['POST'])
     def quick_note():

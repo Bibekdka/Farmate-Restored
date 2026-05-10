@@ -117,7 +117,7 @@ def backfill_weather_history():
                                 date=d_obj,
                                 max_temp=daily_data['temperature_2m_max'][i],
                                 rainfall=daily_data['precipitation_sum'][i],
-                                description=f"History (Code: {code})"
+                                description=WMO_CODES.get(code, f"Code: {code}")
                             )
                             db.session.add(new_log)
                             total_added += 1
