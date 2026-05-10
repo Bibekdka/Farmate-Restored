@@ -64,9 +64,10 @@ class PestLog(db.Model):
 
 class Reminder(db.Model):
     """Task reminders and agricultural schedule items."""
-    # FUTURE EDITING: Consider adding 'task_type' (Sowing, Pruning, Fertilizer) for better filtering.
+    # CATEGORIZATION: Added task_type for better filtering (Sowing, Pruning, Fertilizer, etc.)
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
+    task_type = db.Column(db.String(50), default='General') # Sowing, Pruning, Fertilizer, Harvest, Misc
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.String(500))
     priority = db.Column(db.String(20), default='Normal')

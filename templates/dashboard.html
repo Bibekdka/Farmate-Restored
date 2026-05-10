@@ -91,6 +91,12 @@
                     <h5 class="fw-bold mb-0">New Transaction</h5>
                 </div>
                 <form action="/add_record" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Date</label>
+                            <input type="date" name="date" class="form-control glass-panel" id="transactionDate" required>
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Activity Description</label>
                         <input type="text" name="activity" class="form-control glass-panel" placeholder="e.g., Sold 50kg Tomatoes" required>
@@ -292,6 +298,12 @@
             }
         }
     });
+
+    // Set default date for quick transaction
+    const dateInput = document.getElementById('transactionDate');
+    if (dateInput) {
+        dateInput.valueAsDate = new Date();
+    }
 
     lucide.createIcons();
 </script>

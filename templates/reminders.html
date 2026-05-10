@@ -32,6 +32,18 @@
                         <input type="text" name="title" class="form-control glass-panel" placeholder="e.g., Irrigation System Check" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label small fw-bold">🏷️ Task Type</label>
+                        <select name="task_type" class="form-select glass-panel">
+                            <option value="General">General</option>
+                            <option value="Sowing">Sowing</option>
+                            <option value="Fertilizer">Fertilizer / Pesticide</option>
+                            <option value="Irrigation">Irrigation</option>
+                            <option value="Harvest">Harvesting</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Misc">Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label small fw-bold">ℹ️ Description (Optional)</label>
                         <textarea name="description" class="form-control glass-panel" rows="3" placeholder="Add specific details or instructions..."></textarea>
                     </div>
@@ -70,6 +82,9 @@
                                     <h6 class="mb-0 fw-bold text-dark">{{ reminder.title }}</h6>
                                     <span class="ms-2 badge rounded-pill {% if reminder.priority == 'High' %}bg-danger{% elif reminder.priority == 'Normal' %}bg-warning text-dark{% else %}bg-success{% endif %} bg-opacity-10 text-{{ 'danger' if reminder.priority == 'High' else ('warning' if reminder.priority == 'Normal' else 'success') }}" style="font-size: 0.65rem;">
                                         {{ reminder.priority }}
+                                    </span>
+                                    <span class="ms-2 badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.65rem;">
+                                        {{ reminder.task_type }}
                                     </span>
                                 </div>
                                 <div class="text-muted small d-flex align-items-center mb-2">

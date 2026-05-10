@@ -325,6 +325,7 @@ def create_app(config_name=None):
             try:
                 reminder = Reminder(
                     date=datetime.datetime.strptime(request.form.get('date'), '%Y-%m-%d').date(),
+                    task_type=request.form.get('task_type', 'General'),
                     title=request.form.get('title'),
                     description=request.form.get('description'),
                     priority=request.form.get('priority', 'Normal')
@@ -337,6 +338,22 @@ def create_app(config_name=None):
             return redirect(url_for('reminders'))
         all_reminders = Reminder.query.order_by(Reminder.date.asc()).all()
         return render_template('reminders.html', reminders=all_reminders)
+
+    @app.route('/complete_reminder/<int:reminder_id>', methods=['POST'])
+    def complete_reminder(reminder_id):
+        """Mark a reminder as completed."""
+        reminder = Reminder.query.get_or_404(reminder_id)
+        reminder.completed = True
+        db.session.commit()
+        return redirect(url_for('reminders'))
+
+    @app.route('/delete_reminder/<int:reminder_id>', methods=['POST'])
+    def delete_reminder(reminder_id):
+        """Permanently remove a reminder."""
+        reminder = Reminder.query.get_or_404(reminder_id)
+        db.session.delete(reminder)
+        db.session.commit()
+        return redirect(url_for('reminders'))
 
     @app.route('/delete_yield/<int:yield_id>', methods=['POST'])
     def delete_yield(yield_id):
@@ -354,10 +371,10 @@ def create_app(config_name=None):
         db.session.commit()
         return redirect(url_for('crops'))
 
-    @app.route('/delete_disease/<int:log_id>', methods=['POST'])
-    def delete_disease(log_id):
+    @app.route('/delete_disease/<int:disease_id>', methods=['POST'])
+    def delete_disease(disease_id):
         """Remove a disease log entry."""
-        log = DiseaseLog.query.get_or_404(log_id)
+        log = DiseaseLog.query.get_or_404(disease_id)
         db.session.delete(log)
         db.session.commit()
         return redirect(url_for('disease_log'))
@@ -369,6 +386,12 @@ def create_app(config_name=None):
         db.session.delete(note)
         db.session.commit()
         return redirect(url_for('daily_log'))
+
+    @app.route('/daily_log')
+    def daily_log():
+        """View and manage daily farm observations."""
+        logs = Note.query.order_by(Note.created_at.desc()).all()
+        return render_template('daily_log.html', logs=logs)
 
     @app.route('/save_daily_log', methods=['POST'])
     def save_daily_log():
@@ -440,6 +463,30 @@ def create_app(config_name=None):
         payload = {"contents": [{"parts": [{"text": prompt}]}]}
         result = ai_advisor._call_gemini(payload)
         return jsonify(result)
+
+    @app.route('/weather_history')
+    def weather_history():
+        """View detailed historical weather records."""
+        history = WeatherLog.query.order_by(WeatherLog.date.desc()).all()
+        return render_template('weather_history.html', history=history)
+
+    @app.route('/knowledge')
+    def knowledge():
+        """Educational hub for agriculture best practices."""
+        return render_template('knowledge.html')
+
+    @app.route('/notes', methods=['GET', 'POST'])
+    def notes():
+        """Personal notebook for miscellaneous farm observations."""
+        if request.method == 'POST':
+            content = request.form.get('content')
+            if content:
+                new_note = Note(content=content)
+                db.session.add(new_note)
+                db.session.commit()
+            return redirect(url_for('notes'))
+        all_notes = Note.query.order_by(Note.created_at.desc()).all()
+        return render_template('notes.html', notes=all_notes)
 
     @app.route('/reports')
     def reports():
@@ -568,11 +615,26 @@ def create_app(config_name=None):
 
     @app.route('/download_export')
     def download_export():
-        """Export farm data to Excel or PDF format."""
-        file_format = request.args.get('format', 'xlsx')
-        # FUTURE: Implement actual PDF/Excel generation logic. 
-        # For now, returning a sample or error since libraries might not be installed.
-        return "Export feature is being modernized. Please use the dashboard tables for now.", 501
+        """Export farm data to Excel format."""
+        try:
+            from export_records import export_records
+            from flask import current_app
+            
+            # Generate the file
+            file_path = export_records(current_app._get_current_object())
+            
+            # Ensure file exists
+            if os.path.exists(file_path):
+                return send_file(
+                    os.path.abspath(file_path),
+                    as_attachment=True,
+                    download_name=f"Farm_Records_{datetime.datetime.now().strftime('%Y%m%d')}.xlsx"
+                )
+            else:
+                return "Failed to generate export file.", 500
+        except Exception as e:
+            logger.error(f"Export failed: {e}")
+            return f"Error during export: {str(e)}", 500
 
     @app.route('/api/check-etl', methods=['POST'])
     def api_check_etl():

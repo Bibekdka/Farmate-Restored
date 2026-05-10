@@ -3,12 +3,11 @@ import datetime
 import pandas as pd
 from sqlalchemy import func
 
-from app import app
 from extensions import db
 from models import FarmRecord, WeatherLog
 
 
-def export_records(output_dir='exports'):
+def export_records(app, output_dir='exports'):
     """Export all farm records to Excel with summary sheets and dashboard."""
     os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -152,5 +151,9 @@ def export_records(output_dir='exports'):
 
 
 if __name__ == '__main__':
-    path = export_records()
+    from app import create_app
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+    path = export_records(app)
     print(f'Export written to: {path}')
