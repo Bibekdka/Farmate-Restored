@@ -109,7 +109,12 @@ def create_app(config_name=None):
             logger.error(f"Database query failed on home route: {e}")
             recent_activities = []
 
-        today_reminders = Reminder.query.filter_by(date=datetime.date.today(), completed=False).all()
+        try:
+            today_reminders = Reminder.query.filter_by(date=datetime.date.today(), completed=False).all()
+        except Exception as e:
+            logger.error(f"Reminder query failed on home route: {e}")
+            today_reminders = []
+
         return render_template('index.html', weather=weather_data, activities=recent_activities, reminders=today_reminders)
 
     @app.route('/health')

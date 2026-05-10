@@ -10,10 +10,17 @@ class Config:
         os.makedirs(instance_path)
         
     uri = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(instance_path, 'farm_data.db'))
-    if uri and uri.startswith("postgres://"):
+    if uri and (uri.startswith("postgres://") or uri.startswith("postgresql://")):
+        # Handle the legacy postgres:// scheme for SQLAlchemy 1.4+
         uri = uri.replace("postgres://", "postgresql+psycopg://", 1)
-    elif uri and uri.startswith("postgresql://") and not uri.startswith("postgresql+psycopg://"):
-        uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
+        if not uri.startswith("postgresql+psycopg://"):
+            uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
+        
+        # Ensure SSL is enabled for Neon/Managed DBs
+        if "?" not in uri:
+            uri += "?sslmode=require"
+        elif "sslmode=" not in uri:
+            uri += "&sslmode=require"
     
     SQLALCHEMY_DATABASE_URI = uri
     SQLALCHEMY_TRACK_MODIFICATIONS = False
