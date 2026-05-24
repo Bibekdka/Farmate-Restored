@@ -844,6 +844,14 @@ def create_app(config_name=None):
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)})
 
+    # Global error handler to catch and display unhandled exceptions
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        import traceback
+        logger.error(f"Unhandled Exception: {str(e)}")
+        logger.error(traceback.format_exc())
+        return f"<h1>Internal Server Error - Debug Mode</h1><pre>{traceback.format_exc()}</pre>", 500
+
     # FUTURE EDITING: Add more API endpoints for mobile app integration here.
 
     return app
