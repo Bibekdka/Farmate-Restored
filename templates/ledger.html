@@ -102,7 +102,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for record in records|sort(attribute='date', reverse=True) %}
+                            {% for record in records %}
                             <tr>
                                 <td class="px-4 py-3">
                                     <div class="fw-bold">{{ record.activity_type }}</div>

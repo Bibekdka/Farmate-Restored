@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ feature_name }} - Coming Soon{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="glass-card p-5">
+                <div class="stat-icon-box bg-primary text-white mx-auto mb-4" style="width: 80px; height: 80px; border-radius: 20px;">
+                    <i data-lucide="clock" style="width: 40px; height: 40px;"></i>
+                </div>
+                <h2 class="fw-bold mb-3">{{ feature_name }}</h2>
+                <h4 class="text-primary mb-4">Coming Soon!</h4>
+                <p class="text-muted mb-5">We are working hard to bring this feature to life. It will be available in the next stable release.</p>
+                <a href="javascript:history.back()" class="btn btn-primary px-4 py-2">
+                    <i data-lucide="arrow-left" class="icon-xs me-2"></i> Go Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

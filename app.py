@@ -19,6 +19,7 @@ from models import (
 )
 from config import config
 from ai_service import ai_advisor
+from backup_db import backup_to_multiple_locations
 from utils import (
     setup_logging, load_all_knowledge_bases, convert_to_kg, validate_date,
     validate_amount, validate_string, validate_category
@@ -192,20 +193,29 @@ def create_app(config_name=None):
 
     @app.route('/edit_record/<int:record_id>', methods=['GET', 'POST'])
     def edit_record(record_id):
-        """Update an existing farm record."""
+        """Update an existing farm record with validation."""
         record = FarmRecord.query.get_or_404(record_id)
         if request.method == 'POST':
             try:
-                record.date = datetime.datetime.strptime(request.form.get('date'), '%Y-%m-%d').date()
-                record.activity_type = request.form.get('activity')
-                record.category = request.form.get('category')
+                date_obj = validate_date(request.form.get('date'))
+                activity = validate_string(request.form.get('activity'), min_len=2, max_len=100)
+                category = validate_category(request.form.get('category'))
+                amount = validate_amount(request.form.get('amount'))
+                
+                if not date_obj or not activity or not category or amount is None:
+                    return render_template('edit_record.html', record=record)
+                
+                record.date = date_obj
+                record.activity_type = activity
+                record.category = category
                 
                 expense_types = request.form.getlist('expense_type')
                 record.expense_type = ", ".join(expense_types) if expense_types else request.form.get('expense_type')
                 
-                record.amount = float(request.form.get('amount'))
-                record.description = request.form.get('desc')
+                record.amount = amount
+                record.description = validate_string(request.form.get('desc'), min_len=0, max_len=200, allow_empty=True)
                 db.session.commit()
+                logger.info(f"Record edited: {activity} - {amount} ({category})")
                 return redirect(url_for('dashboard'))
             except Exception as e:
                 logger.error(f"Error editing record: {e}")
@@ -214,10 +224,15 @@ def create_app(config_name=None):
 
     @app.route('/delete_record/<int:record_id>', methods=['POST'])
     def delete_record(record_id):
-        """Remove a farm record."""
+        """Remove a farm record with transaction safety."""
         record = FarmRecord.query.get_or_404(record_id)
-        db.session.delete(record)
-        db.session.commit()
+        try:
+            db.session.delete(record)
+            db.session.commit()
+            logger.info(f"Record deleted: {record_id}")
+        except Exception as e:
+            logger.error(f"Error deleting record {record_id}: {e}")
+            db.session.rollback()
         return redirect(url_for('dashboard'))
 
     @app.route('/crops', methods=['GET', 'POST'])
@@ -470,55 +485,79 @@ def create_app(config_name=None):
     def complete_reminder(reminder_id):
         """Mark a reminder as completed."""
         reminder = Reminder.query.get_or_404(reminder_id)
-        reminder.completed = True
-        db.session.commit()
+        try:
+            reminder.completed = True
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error completing reminder: {e}")
+            db.session.rollback()
         return redirect(url_for('reminders'))
 
     @app.route('/delete_reminder/<int:reminder_id>', methods=['POST'])
     def delete_reminder(reminder_id):
         """Permanently remove a reminder."""
         reminder = Reminder.query.get_or_404(reminder_id)
-        db.session.delete(reminder)
-        db.session.commit()
+        try:
+            db.session.delete(reminder)
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error deleting reminder: {e}")
+            db.session.rollback()
         return redirect(url_for('reminders'))
 
     @app.route('/delete_yield/<int:yield_id>', methods=['POST'])
     def delete_yield(yield_id):
         """Remove a yield record."""
         yield_rec = Yield.query.get_or_404(yield_id)
-        db.session.delete(yield_rec)
-        db.session.commit()
+        try:
+            db.session.delete(yield_rec)
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error deleting yield: {e}")
+            db.session.rollback()
         return redirect(url_for('yield_tracking'))
 
     @app.route('/delete_crop/<int:crop_id>', methods=['POST'])
     def delete_crop(crop_id):
         """Remove a crop record."""
         crop = Crop.query.get_or_404(crop_id)
-        db.session.delete(crop)
-        db.session.commit()
+        try:
+            db.session.delete(crop)
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error deleting crop: {e}")
+            db.session.rollback()
         return redirect(url_for('crops'))
 
     @app.route('/delete_disease/<int:disease_id>', methods=['POST'])
     def delete_disease(disease_id):
         """Remove a disease log entry."""
         log = DiseaseLog.query.get_or_404(disease_id)
-        db.session.delete(log)
-        db.session.commit()
+        try:
+            db.session.delete(log)
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error deleting disease log: {e}")
+            db.session.rollback()
         return redirect(url_for('disease_log'))
 
     @app.route('/delete_note/<int:note_id>', methods=['POST'])
     def delete_note(note_id):
         """Remove a note or daily log entry."""
         note = Note.query.get_or_404(note_id)
-        db.session.delete(note)
-        db.session.commit()
+        try:
+            db.session.delete(note)
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error deleting note: {e}")
+            db.session.rollback()
         return redirect(url_for('daily_log'))
 
     @app.route('/daily_log')
     def daily_log():
         """View and manage daily farm observations."""
         logs = Note.query.order_by(Note.created_at.desc()).all()
-        return render_template('daily_log.html', logs=logs)
+        return render_template('daily_log.html', notes=logs)
 
     @app.route('/save_daily_log', methods=['POST'])
     def save_daily_log():
@@ -526,36 +565,36 @@ def create_app(config_name=None):
         content = request.form.get('content')
         date_str = request.form.get('date')
         if content:
-            new_note = Note(content=content)
-            if date_str:
-                new_note.created_at = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-            db.session.add(new_note)
-            db.session.commit()
+            try:
+                new_note = Note(content=content)
+                if date_str:
+                    new_note.created_at = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+                db.session.add(new_note)
+                db.session.commit()
+            except Exception as e:
+                logger.error(f"Error saving daily log: {e}")
+                db.session.rollback()
         return redirect(url_for('daily_log'))
 
     @app.route('/edit_note/<int:note_id>', methods=['POST'])
     def edit_note(note_id):
         """Modify an existing daily blog entry."""
         note = Note.query.get_or_404(note_id)
-        note.content = request.form.get('content')
-        db.session.commit()
+        try:
+            note.content = request.form.get('content')
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error editing note: {e}")
+            db.session.rollback()
         return redirect(url_for('daily_log'))
 
     @app.route('/api/analyze_logs', methods=['POST'])
     def api_analyze_logs():
-        """Use Gemini to analyze the week's logs for insights."""
-        try:
-            # Fetch recent logs
-            notes = Note.query.order_by(Note.created_at.desc()).limit(10).all()
-            if not notes:
-                return jsonify({'status': 'info', 'message': 'Not enough logs to analyze. Write a few entries first!'})
-            
-            # Use the actual AI service
-            result = ai_advisor.analyze_logs(notes)
-            return jsonify(result)
-        except Exception as e:
-            logger.error(f"AI Analysis failed: {str(e)}")
-            return jsonify({'status': 'error', 'message': "AI Advisor is temporarily busy. Please try again."}), 503
+        """Placeholder for AI Log Analysis (coming soon)."""
+        return jsonify({
+            'status': 'info',
+            'message': 'AI Log Analysis is coming soon!'
+        })
 
     @app.route('/ai_advisor')
     def ai_advisor_page():
@@ -564,36 +603,11 @@ def create_app(config_name=None):
 
     @app.route('/api/ai/chat', methods=['POST'])
     def api_ai_chat():
-        """General purpose AI chat endpoint for the advisor."""
-        data = request.json
-        user_message = data.get('message', '')
-        
-        if not user_message:
-            return jsonify({'status': 'error', 'message': 'Empty message'})
-            
-        # Basic context: Farm current stats
-        total_income = db.session.query(func.sum(FarmRecord.amount)).filter(FarmRecord.category == 'Income').scalar() or 0
-        total_expense = db.session.query(func.sum(FarmRecord.amount)).filter(FarmRecord.category == 'Expense').scalar() or 0
-        
-        prompt = f"""
-        User Message: {user_message}
-        
-        Context:
-        - Current Total Income: ₹{total_income}
-        - Current Total Expenses: ₹{total_expense}
-        - Platform: Farmate Agriculture Admin
-        
-        Respond as a helpful Agronomist AI. If the user asks about crops, diseases, or financial advice, use the context. 
-        Keep responses professional, concise, and formatted with HTML tags if needed.
-        """
-        
-        try:
-            payload = {"contents": [{"parts": [{"text": prompt}]}]}
-            result = ai_advisor._call_gemini(payload)
-            return jsonify(result)
-        except Exception as e:
-            logger.error(f"AI Chat failed: {str(e)}")
-            return jsonify({'status': 'error', 'message': 'AI Advisor connection timeout.'}), 503
+        """Placeholder for AI chat advisor (coming soon)."""
+        return jsonify({
+            'status': 'success',
+            'content': '<div class="alert alert-info border-0 rounded-4 p-3"><i data-lucide="info" class="me-2 text-primary" style="width:18px;"></i> <strong>Feature Coming Soon:</strong> AI advisor chat is currently in development and will be available in a future update. Thank you for your patience!</div>'
+        })
 
     @app.route('/weather_history')
     def weather_history():
@@ -782,26 +796,48 @@ def create_app(config_name=None):
 
     @app.route('/download_export')
     def download_export():
-        """Export farm data to Excel format."""
+        """Export farm data to Excel or PDF format."""
         try:
-            from export_records import export_records
             from flask import current_app
+            fmt = request.args.get('format', 'xlsx')
             
-            # Generate the file
-            file_path = export_records(current_app._get_current_object())
+            if fmt == 'pdf':
+                from export_records import export_records_pdf
+                file_path = export_records_pdf(current_app._get_current_object())
+                download_name = f"Farm_Records_{datetime.datetime.now().strftime('%Y%m%d')}.pdf"
+                mimetype = "application/pdf"
+            else:
+                from export_records import export_records
+                file_path = export_records(current_app._get_current_object())
+                download_name = f"Farm_Records_{datetime.datetime.now().strftime('%Y%m%d')}.xlsx"
+                mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             
             # Ensure file exists
             if os.path.exists(file_path):
                 return send_file(
                     os.path.abspath(file_path),
                     as_attachment=True,
-                    download_name=f"Farm_Records_{datetime.datetime.now().strftime('%Y%m%d')}.xlsx"
+                    download_name=download_name,
+                    mimetype=mimetype
                 )
             else:
                 return "Failed to generate export file.", 500
         except Exception as e:
             logger.error(f"Export failed: {e}")
             return f"Error during export: {str(e)}", 500
+
+    @app.route('/edit_crop/<int:crop_id>', methods=['GET', 'POST'])
+    def edit_crop(crop_id):
+        """Placeholder for crop editing (coming soon)."""
+        return render_template('coming_soon.html', feature_name="Crop Editing")
+
+    @app.route('/api/diagnose_disease', methods=['POST'])
+    def api_diagnose_disease():
+        """Placeholder for AI Disease Diagnostic scanner (coming soon)."""
+        return jsonify({
+            'status': 'error',
+            'message': 'AI Crop Diagnostic scanner is coming soon!'
+        }), 200
 
     @app.route('/api/check-etl', methods=['POST'])
     def api_check_etl():
@@ -843,22 +879,37 @@ def create_app(config_name=None):
 
     @app.route('/api/run_backup', methods=['POST'])
     def run_manual_backup():
-        """Trigger database backup manually via the UI."""
+        """Trigger database backup manually via in-process execution."""
         try:
-            cwd = os.path.dirname(os.path.abspath(__file__))
-            result = subprocess.run([sys.executable, 'backup_db.py'], capture_output=True, text=True, cwd=cwd)
-            return jsonify({'status': 'success' if result.returncode == 0 else 'error', 'log': result.stdout or result.stderr})
+            success = backup_to_multiple_locations()
+            if success:
+                return jsonify({'status': 'success', 'message': 'Backup created successfully.'})
+            else:
+                return jsonify({'status': 'error', 'message': 'Backup failed. Database file not found.'})
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)})
 
     # Global error handler to catch and display unhandled exceptions
     @app.errorhandler(Exception)
-    @app.errorhandler(500)
     def handle_exception(e):
         import traceback
+        from werkzeug.exceptions import HTTPException
+        
+        # Log unhandled exceptions
         logger.error(f"Unhandled Exception: {str(e)}")
         logger.error(traceback.format_exc())
-        return f"<h1>Internal Server Error - Debug Mode</h1><pre>{traceback.format_exc()}</pre>", 500
+        
+        if isinstance(e, HTTPException):
+            if e.code == 500:
+                if app.config.get('DEBUG') or app.config.get('TESTING'):
+                    return f"<h1>Internal Server Error - Debug Mode</h1><pre>{traceback.format_exc()}</pre>", 500
+                return render_template('errors/500.html'), 500
+            return e
+            
+        if app.config.get('DEBUG') or app.config.get('TESTING'):
+            return f"<h1>Internal Server Error - Debug Mode</h1><pre>{traceback.format_exc()}</pre>", 500
+            
+        return render_template('errors/500.html'), 500
 
     # FUTURE EDITING: Add more API endpoints for mobile app integration here.
 
