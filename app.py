@@ -119,6 +119,15 @@ def create_app(config_name=None):
         """Basic health check to verify the app is running."""
         return jsonify({'status': 'healthy', 'timestamp': datetime.datetime.now().isoformat()}), 200
 
+    @app.route('/debug_log')
+    def debug_log():
+        """Expose the application log for production debugging."""
+        try:
+            with open('logs/app.log', 'r') as f:
+                return f.read(), 200, {'Content-Type': 'text/plain'}
+        except Exception as e:
+            return f"Log file not found or unreadable: {e}", 500
+
     @app.route('/dashboard')
     def dashboard():
         """Main financial dashboard with aggregation and visualization."""
