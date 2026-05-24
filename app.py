@@ -844,6 +844,7 @@ def create_app(config_name=None):
 
     # Global error handler to catch and display unhandled exceptions
     @app.errorhandler(Exception)
+    @app.errorhandler(500)
     def handle_exception(e):
         import traceback
         logger.error(f"Unhandled Exception: {str(e)}")
