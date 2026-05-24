@@ -24,7 +24,7 @@ def export_records(app, output_dir='exports'):
             FarmRecord.expense_type, func.sum(FarmRecord.amount)
         ).filter(
             FarmRecord.category == 'Expense',
-            FarmRecord.expense_type != None
+            FarmRecord.expense_type.isnot(None)
         ).group_by(FarmRecord.expense_type).all()
         
         # Income records (without ID)
@@ -141,7 +141,7 @@ def export_records(app, output_dir='exports'):
                 try:
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
-                except:
+                except Exception:
                     pass
             adjusted_width = min(max_length + 2, 30)  # Cap at 30
             sheet.column_dimensions[column_letter].width = adjusted_width

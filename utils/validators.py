@@ -1,6 +1,6 @@
 # Input validation and sanitization
 import logging
-from datetime import date, datetime
+from datetime import datetime
 from functools import wraps
 from flask import jsonify
 

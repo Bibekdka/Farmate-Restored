@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 
 # Local application imports
-from extensions import db, migrate, csrf
+from extensions import db, migrate
 from models import (
     FarmRecord, Note, Crop, Yield, DiseaseLog, 
     PestLog, Reminder, WeatherLog, Inventory, InventoryTransaction
@@ -21,8 +21,7 @@ from config import config
 from ai_service import ai_advisor
 from utils import (
     setup_logging, load_all_knowledge_bases, convert_to_kg, validate_date,
-    validate_amount, validate_crop_id, validate_string, validate_category,
-    FARM_LATITUDE, FARM_LONGITUDE, WMO_CODES, RECORDS_PER_PAGE
+    validate_amount, validate_string, validate_category
 )
 from services.weather_service import (
     get_weather_openmeteo, backfill_weather_history, get_current_weather_simple
@@ -135,7 +134,7 @@ def create_app(config_name=None):
             FarmRecord.expense_type, func.sum(FarmRecord.amount)
         ).filter(
             FarmRecord.category == 'Expense', 
-            FarmRecord.expense_type != None
+            FarmRecord.expense_type.isnot(None)
         ).group_by(FarmRecord.expense_type).all()
         
         expense_breakdown = {type_: amount for type_, amount in expense_breakdown_query}
@@ -154,7 +153,8 @@ def create_app(config_name=None):
         """Add a new farm record with validation."""
         try:
             date_obj = validate_date(request.form.get('date'))
-            if not date_obj: return redirect(url_for('dashboard'))
+            if not date_obj:
+                return redirect(url_for('dashboard'))
             
             activity = validate_string(request.form.get('activity'), min_len=2, max_len=100)
             category = validate_category(request.form.get('category'))
@@ -387,7 +387,6 @@ def create_app(config_name=None):
     def calendar_view(year=None, month=None):
         """Monthly calendar view of records and reminders."""
         import calendar
-        from datetime import date as dt_date
         
         today = datetime.datetime.now()
         if year is None or month is None:
@@ -422,12 +421,14 @@ def create_app(config_name=None):
         events_by_date = {}
         for r in records:
             d = r.date.day
-            if d not in events_by_date: events_by_date[d] = {'records': [], 'reminders': []}
+            if d not in events_by_date:
+                events_by_date[d] = {'records': [], 'reminders': []}
             events_by_date[d]['records'].append(r)
         
         for r in reminders:
             d = r.date.day
-            if d not in events_by_date: events_by_date[d] = {'records': [], 'reminders': []}
+            if d not in events_by_date:
+                events_by_date[d] = {'records': [], 'reminders': []}
             events_by_date[d]['reminders'].append(r)
 
         return render_template('calendar.html', 
@@ -719,7 +720,7 @@ def create_app(config_name=None):
             FarmRecord.expense_type, func.sum(FarmRecord.amount)
         ).filter(
             FarmRecord.category == 'Expense',
-            FarmRecord.expense_type != None,
+            FarmRecord.expense_type.isnot(None),
             FarmRecord.date >= start_date,
             FarmRecord.date <= end_date
         ).group_by(FarmRecord.expense_type).all()

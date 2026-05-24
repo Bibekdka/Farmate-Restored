@@ -138,7 +138,7 @@ def backfill_weather_history():
                             )
                             db.session.add(new_log)
                             total_added += 1
-                    except Exception as e:
+                    except Exception:
                         continue
         
         if total_added > 0:
@@ -160,6 +160,6 @@ def get_current_weather_simple():
         response = requests.get(url, timeout=5)
         if response.status_code == 200:
             return response.json()
-    except:
+    except Exception:
         pass
     return None
